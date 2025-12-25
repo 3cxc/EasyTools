@@ -1,0 +1,58 @@
+﻿using EasyTools.Configs;
+using EasyTools.Events;
+using LabApi.Events.CustomHandlers;
+using LabApi.Features;
+using LabApi.Loader;
+using LabApi.Loader.Features.Plugins;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EasyTools
+{
+    public class Plugins : Plugin
+    {
+
+        public CustomEventHandler Events { get; } = new();
+
+        public override void LoadConfigs()
+        {
+            base.LoadConfigs();
+
+            CustomEventHandler.Config = this.LoadConfig<Config>("config.yml");
+            CustomEventHandler.TranslateConfig = this.LoadConfig<TranslateConfig>("translateConfig.yml");
+        }
+
+
+        public static System.Version RequiredGameVersion => new(14, 1, 1);
+
+        public static Plugins Instance { get; private set; }
+
+        public override string Name => "EasyTools";
+
+        public override string Description => "Server Tools";
+
+        public override string Author => "3cxc";
+
+        public override System.Version Version => new(1, 1, 0);
+
+        public override System.Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
+
+        public override void Enable()
+        {
+            Instance = this;
+
+            CustomHandlersManager.RegisterEventsHandler(Events);
+        }
+
+        public override void Disable()
+        {
+            CustomHandlersManager.UnregisterEventsHandler(Events);
+
+            Instance = null;
+        }
+
+    }
+}
