@@ -124,6 +124,7 @@
     <Compile Include="Configs\Config.cs" />
     <Compile Include="Configs\CustomRoleConfig.cs" />
     <Compile Include="Configs\TranslateConfig.cs" />
+    <Compile Include="DataBase\Serialization\PlayerData.cs" />
     <Compile Include="Events\CustomEventHandler.cs" />
     <Compile Include="Plugins.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

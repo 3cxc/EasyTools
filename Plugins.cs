@@ -26,6 +26,7 @@ namespace EasyTools
             CustomEventHandler.TranslateConfig = this.LoadConfig<TranslateConfig>("translateConfig.yml");
             CustomEventHandler.BadgeConfig = this.LoadConfig<BadgeConfig>("badgeConfig.yml");
             CustomEventHandler.CustomRoleConfig = this.LoadConfig<CustomRoleConfig>("customRoleConfig.yml");
+            CustomEventHandler.DataBaseConfig = this.LoadConfig<DataBaseConfig>("dataBaseConfig.yml");
 
             if (!Directory.Exists(CustomEventHandler.BadgeConfig.Pach))
             {

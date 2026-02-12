@@ -40,6 +40,8 @@ namespace EasyTools.Events
 
         public static CustomRoleConfig CustomRoleConfig;
 
+        public static DataBaseConfig DataBaseConfig;
+
         public static CoroutineHandle Badge_Coroutine;
 
         public override void OnServerWaitingForPlayers()
