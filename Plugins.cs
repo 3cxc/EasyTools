@@ -1,4 +1,5 @@
 ﻿using EasyTools.Configs;
+using EasyTools.DataBase.Serialization;
 using EasyTools.Events;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features;
@@ -20,6 +21,21 @@ namespace EasyTools
             CustomEventHandler.BadgeConfig = this.LoadConfig<BadgeConfig>("badgeConfig.yml");
             CustomEventHandler.CustomRoleConfig = this.LoadConfig<CustomRoleConfig>("customRoleConfig.yml");
             CustomEventHandler.DataBaseConfig = this.LoadConfig<DataBaseConfig>("dataBaseConfig.yml");
+            CustomEventHandler.HUDInfoConfig = this.LoadConfig<HUDInfoConfig>("HUDInfoConfig.yml");
+
+            CustomEventHandler.data_914 = new HintData
+            (
+                CustomEventHandler.HUDInfoConfig._914_x,
+                CustomEventHandler.HUDInfoConfig._914_y,
+                CustomEventHandler.HUDInfoConfig._914_font
+            );
+
+            CustomEventHandler.data_elevator = new HintData
+            (
+                CustomEventHandler.HUDInfoConfig._elev_x,
+                CustomEventHandler.HUDInfoConfig._elev_y,
+                CustomEventHandler.HUDInfoConfig._elev_font
+            );
 
             if (!Directory.Exists(CustomEventHandler.BadgeConfig.Pach))
             {
@@ -54,6 +70,9 @@ namespace EasyTools
             CustomHandlersManager.UnregisterEventsHandler(Events);
 
             Instance = null;
+
+            foreach (var hud in CustomEventHandler._huds.Values) hud.Dispose();
+            CustomEventHandler._huds.Clear();
         }
 
     }

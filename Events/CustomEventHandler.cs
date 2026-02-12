@@ -1,11 +1,15 @@
 ﻿using EasyTools.BadgeSystem;
 using EasyTools.Configs;
+using EasyTools.DataBase.Serialization;
 using EasyTools.Utils;
+using Hints;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.Scp914Events;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Wrappers;
+using MapGeneration;
 using MEC;
 using PlayerRoles;
 using PlayerStatsSystem;
@@ -30,7 +34,13 @@ namespace EasyTools.Events
 
         public static DataBaseConfig DataBaseConfig;
 
+        public static HUDInfoConfig HUDInfoConfig;
+
         public static CoroutineHandle Badge_Coroutine;
+
+        public static readonly Dictionary<Player, PlayerHint> _huds = new();
+
+        public static HintData data_914, data_elevator;
 
         public override void OnServerWaitingForPlayers()
         {
@@ -58,6 +68,7 @@ namespace EasyTools.Events
                 {
                     Timing.RunCoroutine(ScpReal.AutoReal());
                 }
+                _huds.Values.ToList().ForEach(h => h.Start());
             });
         }
 
@@ -100,6 +111,8 @@ namespace EasyTools.Events
                 Badge.Handler(player);
             }
 
+            _huds[player] = new PlayerHint(player, data_914, data_elevator);
+
         }
 
         public override void OnPlayerLeft(PlayerLeftEventArgs ev)
@@ -122,6 +135,7 @@ namespace EasyTools.Events
                 Badge.Remove(player);
             }
 
+            if (_huds.ContainsKey(player))
             {
                 _huds.Remove(player);
             }
@@ -469,6 +483,42 @@ namespace EasyTools.Events
                 Server.SendBroadcast($"\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {player.Nickname} 通过抛硬币{rewardName}！</color></size></b>", 3);
             }
 
+        }
+
+        public override void OnScp914Activating(Scp914ActivatingEventArgs ev)
+        {
+            if (HUDInfoConfig.info_914 == false) return;
+
+            Scp914.Scp914KnobSetting knob = ev.KnobSetting;
+            string mode = TranslateConfig.scp914_trans[knob];
+
+            var p_operator = ev.Player.Nickname ?? "未知";
+
+            string msg = TranslateConfig.scp914_template.Replace("{mode}", mode)
+                                   .Replace("{p_operator}", p_operator);
+
+            foreach (var p in Player.List)
+            {
+                if (p.IsAlive && p != null && p.Room.Name == RoomName.Lcz914)// 检测914附近玩家，然后告诉他们914正在运行
+                {
+                    _huds[p].Show914(msg);
+                }
+            }
+        }
+
+        public override void OnPlayerInteractingElevator(PlayerInteractingElevatorEventArgs ev)
+        {
+            if (HUDInfoConfig.info_elevator == false) return;
+
+            IEnumerable<Player> near = Player.List.Where(p =>
+                Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.elev_range);
+
+            var p_operator = ev.Player.Nickname ?? "未知";
+            string text = TranslateConfig.elev_template.Replace("{p_operator}", p_operator);
+            foreach (var p in near)
+            {
+                _huds[p].ShowElevator(text);
+            }
         }
     }
 }
