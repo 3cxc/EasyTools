@@ -41,6 +41,8 @@ namespace EasyTools.Events
                 Badge.rainbw.Clear();
                 Badge_Coroutine = Timing.RunCoroutine(Badge.Rainbw());
             }
+
+            Server.FriendlyFire = false;
         }
 
         public override void OnServerRoundStarted()
