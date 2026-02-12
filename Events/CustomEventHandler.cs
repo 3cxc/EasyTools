@@ -1,31 +1,19 @@
-﻿using CommandSystem.Commands.RemoteAdmin.Decontamination;
-using EasyTools.BadgeSystem;
+﻿using EasyTools.BadgeSystem;
 using EasyTools.Configs;
 using EasyTools.Utils;
-using GameCore;
-using HintServiceMeow.UI.Utilities;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Wrappers;
 using MEC;
-using NewXp.IniApi;
 using PlayerRoles;
 using PlayerStatsSystem;
-using RemoteAdmin.Communication;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.LowLevel;
-using static Broadcast;
-using static UnityEngine.GraphicsBuffer;
 using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.Events
@@ -123,7 +111,7 @@ namespace EasyTools.Events
             {
                 Badge.Remove(player);
             }
-            
+
         }
 
         public override void OnPlayerHurting(PlayerHurtingEventArgs ev)
@@ -239,7 +227,7 @@ namespace EasyTools.Events
             {
                 Timing.CallDelayed(0.5f, () =>
                 {
-                    Player.GiveCandy(InventorySystem.Items.Usables.Scp330.CandyKindID.Pink, ItemAddReason.AdminCommand);              
+                    Player.GiveCandy(InventorySystem.Items.Usables.Scp330.CandyKindID.Pink, ItemAddReason.AdminCommand);
                 });
             }
 
@@ -386,7 +374,7 @@ namespace EasyTools.Events
             }
             else if (randomValue < 15f && !success) // 5% 粉糖
             {
-                player.GiveCandy(InventorySystem.Items.Usables.Scp330.CandyKindID.Pink,ItemAddReason.Undefined);
+                player.GiveCandy(InventorySystem.Items.Usables.Scp330.CandyKindID.Pink, ItemAddReason.Undefined);
                 rewardName = "获得了粉糖";
                 success = true;
             }
@@ -412,7 +400,8 @@ namespace EasyTools.Events
                 if (healthIndex)
                 {
                     player.AddItem(ItemType.SCP500);
-                }else
+                }
+                else
                 {
                     player.AddItem(ItemType.Medkit);
                 }
@@ -450,7 +439,8 @@ namespace EasyTools.Events
                 {
                     PocketDimension.ForceInside(player);
                     rewardName = "传送到老头空间";
-                }else
+                }
+                else
                 {
                     PocketDimension.ForceExit(player);
                     rewardName = "离开了老头空间";

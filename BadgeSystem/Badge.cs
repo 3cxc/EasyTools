@@ -1,15 +1,9 @@
-﻿using EasyTools.Configs;
-using EasyTools.Events;
-using GameCore;
+﻿using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using MEC;
 using NewXp.IniApi;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.BadgeSystem

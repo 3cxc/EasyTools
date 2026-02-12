@@ -1,12 +1,8 @@
-﻿using CustomPlayerEffects;
-using EasyTools.Events;
+﻿using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using MEC;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace EasyTools.Utils
@@ -45,14 +41,14 @@ namespace EasyTools.Utils
                         _lastHealth[p] = lastHealth;
 
                         Vector3 pos = p.Position;
-                        if(_lastMove.TryGetValue(p,out var last))
+                        if (_lastMove.TryGetValue(p, out var last))
                         {
-                            if (Vector3.Distance(pos,last.pos) < 0.1f)
+                            if (Vector3.Distance(pos, last.pos) < 0.1f)
                             {
 
                                 bool canceled = false;
                                 // 检测是否正在受伤
-                                if (_lastDamageTime.TryGetValue(p,out var lastDamageTime))
+                                if (_lastDamageTime.TryGetValue(p, out var lastDamageTime))
                                 {
                                     if (DateTime.UtcNow - lastDamageTime < TimeSpan.FromSeconds(CustomEventHandler.Config.heal_atk_secend)) { canceled = true; }
                                 }
@@ -68,8 +64,10 @@ namespace EasyTools.Utils
                                 }
                             }
                             else { _lastMove[p] = (pos, DateTime.UtcNow); }
-                        }else { _lastMove[p] = (pos, DateTime.UtcNow); }
-                    }else if (_lastMove.ContainsKey(p)) { _lastMove.Remove(p); }
+                        }
+                        else { _lastMove[p] = (pos, DateTime.UtcNow); }
+                    }
+                    else if (_lastMove.ContainsKey(p)) { _lastMove.Remove(p); }
                 }
                 yield return Timing.WaitForSeconds(1f);
             }

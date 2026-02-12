@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using EasyTools.DataBase.Serialization;
+﻿using EasyTools.DataBase.Serialization;
 using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using LiteDB;
 using MEC;
 using System;
+using System.Collections.Generic;
 
 namespace EasyTools.DataBase
 {

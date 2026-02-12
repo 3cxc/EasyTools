@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EasyTools.Configs
 {
@@ -25,7 +22,7 @@ namespace EasyTools.Configs
         public ushort AutoServerMessageTimer { get; set; } = 5;
 
         [Description("服务器广播文本")]
-        public List<string> AutoServerMessageText { get; set; } = ["服务器广播1","服务器广播2"];
+        public List<string> AutoServerMessageText { get; set; } = ["服务器广播1", "服务器广播2"];
 
         /// /////////////////////////////////////////////////
         [Description("启用.bc和.c聊天系统")]

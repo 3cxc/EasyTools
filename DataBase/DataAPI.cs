@@ -1,12 +1,7 @@
 ﻿using EasyTools.DataBase.Serialization;
 using EasyTools.Events;
 using LiteDB;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.LowLevel;
 
 namespace EasyTools.DataBase
 {
@@ -22,7 +17,7 @@ namespace EasyTools.DataBase
                 return true;
             }
             using LiteDatabase database = new(CustomEventHandler.DataBaseConfig.database_path);
-            
+
             if ((data = database.GetCollection<PlayerData>("Players")?.FindById(id)) != null)
             {
                 PlayerDataDic.Add(id, data);
