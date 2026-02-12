@@ -130,6 +130,7 @@
     <Compile Include="Utils\Ini.cs" />
     <Compile Include="Utils\Pool\IPool.cs" />
     <Compile Include="Utils\Pool\StringBuilderPool.cs" />
+    <Compile Include="Utils\ScpReal.cs" />
     <Compile Include="Utils\Util.cs" />
   </ItemGroup>
   <ItemGroup>

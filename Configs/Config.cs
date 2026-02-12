@@ -85,5 +85,20 @@ namespace EasyTools.Configs
 
         [Description("Is 1853 harmless? / 是否开启1853(洗手液)无害?")]
         public bool harmless_1853 { get; set; } = true;
+
+
+        /// /////////////////////////////////////////////////
+        [Description("SCP静止回血？")]
+        public bool heal_scp { get; set; } = true;
+
+
+        [Description("等待多少秒后持续回血")]
+        public float heal_scp_secend { get; set; } = 6;
+
+        [Description("受伤检测")]
+        public float heal_atk_secend { get; set; } = 2;
+
+        [Description("回血量")]
+        public int heal_scp_x { get; set; } = 2;
     }
 }

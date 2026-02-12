@@ -58,6 +58,11 @@ namespace EasyTools.Events
                 {
                     Timing.RunCoroutine(Util.AutoServerBroadcast());
                 }
+
+                if (Config.heal_scp)
+                {
+                    Timing.RunCoroutine(ScpReal.AutoReal());
+                }
             });
         }
 
