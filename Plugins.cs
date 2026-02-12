@@ -34,17 +34,17 @@ namespace EasyTools
         }
 
 
-        public static System.Version RequiredGameVersion => new(14, 1, 1);
+        public static System.Version RequiredGameVersion => new(14, 2, 1);
 
         public static Plugins Instance { get; private set; }
 
         public override string Name => "EasyTools";
 
-        public override string Description => "Server Tools";
+        public override string Description => "一个简单的服务器工具插件";
 
         public override string Author => "3cxc";
 
-        public override System.Version Version => new(1, 1, 0);
+        public override System.Version Version => new(1, 0, 0);
 
         public override System.Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 
