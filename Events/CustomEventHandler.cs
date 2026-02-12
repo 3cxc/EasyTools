@@ -28,6 +28,19 @@ namespace EasyTools.Events
 
         public static TranslateConfig TranslateConfig;
 
+        public static BadgeConfig BadgeConfig;
+        public static CoroutineHandle Badge_Coroutine;
+        public override void OnServerWaitingForPlayers()
+        {
+            base.OnServerWaitingForPlayers();
+
+            if (BadgeConfig.Enable)
+            {
+                Badge.rainbw.Clear();
+                Badge_Coroutine = Timing.RunCoroutine(Badge.Rainbw());
+            }
+        }
+
         public override void OnServerRoundStarted()
         {
             Timing.CallDelayed(10f, () =>
@@ -37,6 +50,16 @@ namespace EasyTools.Events
                     Timing.RunCoroutine(Util.AutoServerBroadcast());
                 }
             });
+        }
+
+        public override void OnServerRoundEnded(RoundEndedEventArgs ev)
+        {
+            base.OnServerRoundEnded(ev);
+
+            if (BadgeConfig.Enable)
+            {
+                Timing.KillCoroutines(Badge_Coroutine);
+            }
         }
 
         public override void OnPlayerJoined(PlayerJoinedEventArgs ev)
@@ -57,6 +80,17 @@ namespace EasyTools.Events
 
                 File.AppendAllText(Config.LoggerSavePath, playerInfo + Environment.NewLine);
             }
+            if (BadgeConfig.Enable)
+            {
+                Badge.Handler(player);
+            }
+
+        }
+            if (BadgeConfig.Enable)
+            {
+                Badge.Remove(player);
+            }
+            
         }
 
         public override void OnPlayerHurting(PlayerHurtingEventArgs ev)
