@@ -129,7 +129,10 @@
     <Compile Include="Configs\BadgeConfig.cs" />
     <Compile Include="Configs\Config.cs" />
     <Compile Include="Configs\CustomRoleConfig.cs" />
+    <Compile Include="Configs\DataBaseConfig.cs" />
     <Compile Include="Configs\TranslateConfig.cs" />
+    <Compile Include="DataBase\DataAPI.cs" />
+    <Compile Include="DataBase\InfoExtension.cs" />
     <Compile Include="DataBase\Serialization\PlayerData.cs" />
     <Compile Include="Events\CustomEventHandler.cs" />
     <Compile Include="Plugins.cs" />
