@@ -49,5 +49,4 @@ EasyTools 是一个基于 LabAPI 的插件，它提供了一些简单的自定�
 ## 基于项目
 - [HelpSense](https://github.com/XLittleLeft/HelpSense) 本项目的基础代码来源
 - [NewDIR](https://github.com/YF-OFFICE/NewDIR) 称号系统
-- HUDInfo 914合成提示
-- UsefulAdditions 快速刷新(快速重生)
+- HUDInfo 914合成提示, 电梯使用提示
