@@ -67,6 +67,12 @@ namespace EasyTools.Events
             {
                 Timing.KillCoroutines(Badge_Coroutine);
             }
+
+            if (Config.EnableFriendFire)
+            {
+                Server.FriendlyFire = true;
+                Server.SendBroadcast($"\n<b><size=25><color=#00CC00>🎉 回合结束，友伤已开启~</color></size></b>", 5);
+            }
         }
 
         public override void OnPlayerJoined(PlayerJoinedEventArgs ev)

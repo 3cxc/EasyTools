@@ -102,5 +102,9 @@ namespace EasyTools.Configs
         /// /////////////////////////////////////////////////
         [Description("开启硬币抽卡?")]
         public bool Coin { get; set; } = true;
+
+        /// /////////////////////////////////////////////////
+        [Description("开启回合结束友伤?")]
+        public bool EnableFriendFire { get; set; } = true;
     }
 }
