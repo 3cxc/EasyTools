@@ -125,7 +125,7 @@
     <Compile Include="Commands\Chat\AcCommand.cs" />
     <Compile Include="Commands\Chat\BcCommand.cs" />
     <Compile Include="Commands\Chat\CCommand.cs" />
-    <Compile Include="Commands\RescueCommand.cs" />
+    <Compile Include="Commands\KillMeCommand.cs" />
     <Compile Include="Configs\BadgeConfig.cs" />
     <Compile Include="Configs\Config.cs" />
     <Compile Include="Configs\CustomRoleConfig.cs" />

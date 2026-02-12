@@ -120,54 +120,8 @@ namespace EasyTools.Events
                 Badge.Remove(player);
             }
 
-        }
-
-        public override void OnPlayerHurting(PlayerHurtingEventArgs ev)
-        {
-            if (Config.Harmless207)
             {
-                if (ev.DamageHandler is UniversalDamageHandler && ev.DamageHandler.DeathScreenText.Contains("SCP-207"))
-                {
-                    ev.IsAllowed = false;
-                }
-            }
-
-            if (Config.Harmless1853)
-            {
-                if (ev.DamageHandler is UniversalDamageHandler && ev.DamageHandler.DeathScreenText.Contains("poison"))
-                {
-                    ev.IsAllowed = false;
-                }
-            }
-        }
-
-        public override void OnPlayerEscaping(PlayerEscapingEventArgs ev)
-        {
-            if (Config.GuardsCanEscape)
-            {
-                RoleTypeId id;
-                switch (Config.EscapedGuardRole)
-                {
-                    case "NtfSergeant":
-                        id = RoleTypeId.NtfSergeant;
-                        break;
-                    case "NtfPrivate":
-                        id = RoleTypeId.NtfPrivate;
-                        break;
-                    case "NtfSpecialist":
-                        id = RoleTypeId.NtfSpecialist;
-                        break;
-                    default:
-                        id = RoleTypeId.NtfCaptain;
-                        break;
-
-                }
-
-                if (ev.Player.Role == RoleTypeId.FacilityGuard)
-                {
-                    ev.Player.SetRole(id);
-                    ev.IsAllowed = true;
-                }
+                _huds.Remove(player);
             }
         }
 
@@ -241,6 +195,55 @@ namespace EasyTools.Events
 
         }
 
+        public override void OnPlayerHurting(PlayerHurtingEventArgs ev)
+        {
+            if (Config.Harmless207)
+            {
+                if (ev.DamageHandler is UniversalDamageHandler && ev.DamageHandler.DeathScreenText.Contains("SCP-207"))
+                {
+                    ev.IsAllowed = false;
+                }
+            }
+
+            if (Config.Harmless1853)
+            {
+                if (ev.DamageHandler is UniversalDamageHandler && ev.DamageHandler.DeathScreenText.Contains("poison"))
+                {
+                    ev.IsAllowed = false;
+                }
+            }
+        }
+
+        public override void OnPlayerEscaping(PlayerEscapingEventArgs ev)
+        {
+            if (Config.GuardsCanEscape)
+            {
+                RoleTypeId id;
+                switch (Config.EscapedGuardRole)
+                {
+                    case "NtfSergeant":
+                        id = RoleTypeId.NtfSergeant;
+                        break;
+                    case "NtfPrivate":
+                        id = RoleTypeId.NtfPrivate;
+                        break;
+                    case "NtfSpecialist":
+                        id = RoleTypeId.NtfSpecialist;
+                        break;
+                    default:
+                        id = RoleTypeId.NtfCaptain;
+                        break;
+
+                }
+
+                if (ev.Player.Role == RoleTypeId.FacilityGuard)
+                {
+                    ev.Player.SetRole(id);
+                    ev.IsAllowed = true;
+                }
+            }
+        }
+
         public override void OnPlayerInteractingScp330(PlayerInteractingScp330EventArgs ev)
         {
             if (Config.EnablePinkCandy)
@@ -297,7 +300,7 @@ namespace EasyTools.Events
         public override void OnPlayerFlippingCoin(PlayerFlippingCoinEventArgs ev)
         {
             if (!ev.IsAllowed) return;
-            if (!Config.coin) return;
+            if (!Config.Coin) return;
             if (ev.Player.Items.Count() == 8)
             {
                 ev.Player.SendBroadcast($"\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>", 2);
