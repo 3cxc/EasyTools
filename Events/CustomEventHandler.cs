@@ -131,7 +131,7 @@ namespace EasyTools.Events
 
         public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
         {
-            if (CustomRoleConfig.spawn_scp_3114 && Player.ReadyList.Count() >= CustomRoleConfig.spawn_scp_3114_limit && !scp_3114_spawned)
+            if (CustomRoleConfig.spawn_scp_3114 && !scp_3114_spawned && Player.ReadyList.Count() >= CustomRoleConfig.spawn_scp_3114_limit)
             {
                 foreach (Player p in Player.ReadyList)
                 {
@@ -146,6 +146,7 @@ namespace EasyTools.Events
                         });
                     }
                 }
+                scp_3114_spawned = true;
             }
         }
 
