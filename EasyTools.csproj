@@ -115,16 +115,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BadgeSystem\Badge.cs" />
     <Compile Include="Commands\Chat\AcCommand.cs" />
     <Compile Include="Commands\Chat\BcCommand.cs" />
     <Compile Include="Commands\Chat\CCommand.cs" />
     <Compile Include="Commands\RescueCommand.cs" />
+    <Compile Include="Configs\BadgeConfig.cs" />
     <Compile Include="Configs\Config.cs" />
     <Compile Include="Configs\TranslateConfig.cs" />
     <Compile Include="Events\CustomEventHandler.cs" />
     <Compile Include="Plugins.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ChatUtils.cs" />
+    <Compile Include="Utils\Ini.cs" />
     <Compile Include="Utils\Pool\IPool.cs" />
     <Compile Include="Utils\Pool\StringBuilderPool.cs" />
     <Compile Include="Utils\Util.cs" />

@@ -1,11 +1,14 @@
 ﻿using EasyTools.Configs;
 using EasyTools.Events;
 using LabApi.Events.CustomHandlers;
+using LabApi.Events.Handlers;
 using LabApi.Features;
+using LabApi.Features.Wrappers;
 using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,15 +17,19 @@ namespace EasyTools
 {
     public class Plugins : Plugin
     {
-
         public CustomEventHandler Events { get; } = new();
-
         public override void LoadConfigs()
         {
             base.LoadConfigs();
 
             CustomEventHandler.Config = this.LoadConfig<Config>("config.yml");
             CustomEventHandler.TranslateConfig = this.LoadConfig<TranslateConfig>("translateConfig.yml");
+            CustomEventHandler.BadgeConfig = this.LoadConfig<BadgeConfig>("badgeConfig.yml");
+
+            if (!Directory.Exists(CustomEventHandler.BadgeConfig.Pach))
+            {
+                Directory.CreateDirectory(CustomEventHandler.BadgeConfig.Pach);
+            }
         }
 
 
