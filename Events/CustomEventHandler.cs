@@ -269,5 +269,174 @@ namespace EasyTools.Events
                 }
             }
         }
+
+        public override void OnPlayerFlippingCoin(PlayerFlippingCoinEventArgs ev)
+        {
+            if (!ev.IsAllowed) return;
+            if (!Config.coin) return;
+            if (ev.Player.Items.Count() == 8)
+            {
+                ev.Player.SendBroadcast($"\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>", 2);
+                return;
+            }
+
+            Player player = ev.Player;
+
+            player.RemoveItem(ItemType.Coin);
+
+            // 生成0-100的随机数
+            float randomValue = UnityEngine.Random.Range(0f, 100f);
+
+            // 初始化奖励变量
+            string rewardName = "";
+            bool success = false;
+
+            // 概率判断（从高到低）
+            if (randomValue < 0.3f) // 0.3% 变成SCP
+            {
+                int scpType = UnityEngine.Random.Range(0, 4);
+                switch (scpType)
+                {
+                    case 0:
+                        player.Role = RoleTypeId.Scp939;
+                        rewardName = "变成了狗子";
+                        break;
+                    case 1:
+                        player.Role = RoleTypeId.Scp3114;
+                        rewardName = "变成了3114";
+                        break;
+                    case 2:
+                        player.Role = RoleTypeId.Scp106;
+                        rewardName = "变成了老头";
+                        break;
+                    case 3:
+                        player.Role = RoleTypeId.Scp049;
+                        rewardName = "变成了49";
+                        break;
+                    default:
+                        player.Role = RoleTypeId.Scp939;
+                        rewardName = "变成了狗子";
+                        break;
+                }
+                success = true;
+            }
+            else if (randomValue < 1f && !success) // 0.7% 特殊武器
+            {
+                int weaponIndex = UnityEngine.Random.Range(0, 3);
+
+                switch (weaponIndex)
+                {
+                    case 0: // 127
+                        player.AddItem(ItemType.GunSCP127);
+                        rewardName = "获得了127";
+                        break;
+                    case 1: // 3X
+                        player.AddItem(ItemType.ParticleDisruptor);
+                        rewardName = "获得了3X";
+                        break;
+                    case 2: // 电炮
+                        player.AddItem(ItemType.MicroHID);
+                        rewardName = "获得了电炮";
+                        break;
+                    default:
+                        player.AddItem(ItemType.GunSCP127);
+                        rewardName = "获得了127";
+                        break;
+                }
+                success = true;
+            }
+            else if (randomValue < 5f && !success) // 4% 黑卡
+            {
+                player.AddItem(ItemType.KeycardO5);
+                rewardName = "获得了O5卡";
+                success = true;
+            }
+            else if (randomValue < 10f && !success) // 5% 可乐
+            {
+                player.AddItem(ItemType.SCP207);
+                rewardName = "获得了可乐";
+                success = true;
+            }
+            else if (randomValue < 15f && !success) // 5% 粉糖
+            {
+                player.GiveCandy(InventorySystem.Items.Usables.Scp330.CandyKindID.Pink,ItemAddReason.Undefined);
+                rewardName = "获得了粉糖";
+                success = true;
+            }
+            else if (randomValue < 25f && !success) // 10% 枪
+            {
+                bool weaponIndex = UnityEngine.Random.Range(0, 2) == 0;
+                if (weaponIndex)
+                {
+                    player.AddItem(ItemType.GunFRMG0);
+                    rewardName = "获得了狗官枪";
+                }
+                else
+                {
+                    player.AddItem(ItemType.GunLogicer);
+                    rewardName = "获得了大机枪";
+                }
+                success = true;
+            }
+            else if (randomValue < 35f && !success) // 10% 医疗
+            {
+                bool healthIndex = UnityEngine.Random.Range(0, 2) == 0;
+
+                if (healthIndex)
+                {
+                    player.AddItem(ItemType.SCP500);
+                }else
+                {
+                    player.AddItem(ItemType.Medkit);
+                }
+                rewardName = "获得了医疗物品";
+                success = true;
+            }
+            else if (randomValue < 45f && !success) // 10% 红卡
+            {
+                player.AddItem(ItemType.KeycardFacilityManager);
+                rewardName = "获得了设施总监卡";
+                success = true;
+            }
+            else if (randomValue < 60f && !success) // 15% 随机传送
+            {
+                foreach (Player p in Player.ReadyList)
+                {
+                    if (p.IsSCP)
+                    {
+                        player.Position = p.Position + Vector3.right;
+                        player.Rotation = p.Rotation;
+                    }
+                }
+                rewardName = "被传送到SCP旁边";
+                success = true;
+            }
+            else if (randomValue < 80f && !success) // 20% 手雷
+            {
+                player.AddItem(ItemType.GrenadeHE);
+                rewardName = "获得了手雷";
+                success = true;
+            }
+            else if (!success) // 20% 老头空间
+            {
+                if (!PocketDimension.IsPlayerInside(player))
+                {
+                    PocketDimension.ForceInside(player);
+                    rewardName = "传送到老头空间";
+                }else
+                {
+                    PocketDimension.ForceExit(player);
+                    rewardName = "离开了老头空间";
+                }
+                success = true;
+            }
+
+            // 通知玩家
+            if (success)
+            {
+                Server.SendBroadcast($"\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {player.Nickname} 通过抛硬币{rewardName}！</color></size></b>", 3);
+            }
+
+        }
     }
 }

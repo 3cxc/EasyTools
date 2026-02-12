@@ -100,5 +100,9 @@ namespace EasyTools.Configs
 
         [Description("回血量")]
         public int heal_scp_x { get; set; } = 2;
+
+        /// /////////////////////////////////////////////////
+        [Description("开启硬币抽卡?")]
+        public bool coin { get; set; } = true;
     }
 }
