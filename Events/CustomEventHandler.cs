@@ -37,6 +37,9 @@ namespace EasyTools.Events
         public static TranslateConfig TranslateConfig;
 
         public static BadgeConfig BadgeConfig;
+
+        public static CustomRoleConfig CustomRoleConfig;
+
         public static CoroutineHandle Badge_Coroutine;
 
         public override void OnServerWaitingForPlayers()
@@ -166,6 +169,28 @@ namespace EasyTools.Events
                 {
                     ev.Player.SetRole(id);
                     ev.IsAllowed = true;
+                }
+            }
+        }
+
+        public static bool scp_3114_spawned = false; //用以确保不会重复生成SCP-3114
+
+        public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
+        {
+            if (CustomRoleConfig.spawn_scp_3114 && Player.ReadyList.Count() >= CustomRoleConfig.spawn_scp_3114_limit && !scp_3114_spawned)
+            {
+                foreach (Player p in Player.ReadyList)
+                {
+                    bool weaponIndex = UnityEngine.Random.Range(0, 10) == 3;
+                    if (weaponIndex)
+                    {
+                        Timing.CallDelayed(0.5f, () =>
+                        {
+                            ev.Player.Role = RoleTypeId.Scp3114;
+                            ev.IsAllowed = true;
+                            scp_3114_spawned = true;
+                        });
+                    }
                 }
             }
         }
