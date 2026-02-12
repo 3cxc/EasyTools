@@ -14,7 +14,7 @@ namespace EasyTools.Commands
 
         public string[] Aliases => ["suicide"];
 
-        public string Description => "防卡死命令";
+        public string Description => "自救命令";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {

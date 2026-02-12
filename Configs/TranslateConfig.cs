@@ -7,11 +7,11 @@ namespace EasyTools.Configs
 {
     public class TranslateConfig
     {
-        [Description("卡虚空自救指令_错误")]
+        [Description("自救指令_错误")]
         public string RescueCommandError { get; set; } = "执行指令时发生错误，请稍后再试";
-        [Description("卡虚空自救指令_失败")]
+        [Description("自救指令_失败")]
         public string RescueCommandFailed { get; set; } = "失败，可能指令未启用或者身份不允许等";
-        [Description("卡虚空自救指令_成功")]
+        [Description("自救指令_成功")]
         public string RescueCommandOk { get; set; } = "成功";
         [Description("聊天指令_错误")]
         public string ChatCommandError { get; set; } = "发送消息时出现错误，请稍后重试";
