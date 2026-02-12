@@ -1,4 +1,5 @@
-﻿using LabApi.Loader.Features.Paths;
+﻿using LabApi.Features.Wrappers;
+using LabApi.Loader.Features.Paths;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -69,37 +70,37 @@ namespace EasyTools.Configs
         [Description("Logger module settings / 日志模块设置")]
         public bool EnableLogger { get; set; } = true;
 
-        [Description("Logger module settings / 日志保存路径")]
-        public string LoggerSavePath { get; set; } = Path.Combine(PathManager.Configs.FullName ?? Environment.CurrentDirectory, @"JoinLogs.txt");
+        [Description("Player logger settings / 玩家日志保存路径")]
+        public string PlayerLogPath { get; set; } = Path.Combine(PathManager.Configs.FullName ?? Environment.CurrentDirectory, @$"{Server.Port}.txt");
 
-        [Description("管理日志地址")]
-        public string AdminLogPath { get; set; } = $"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\Admins.txt";
+        [Description("Management logger settings / 管理日志保存路径")]
+        public string AdminLogPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
         /// /////////////////////////////////////////////////
         [Description("Is 207 harmless? / 是否开启207(可乐)无害?")]
-        public bool harmless_207 { get; set; } = true;
+        public bool Harmless207 { get; set; } = true;
 
 
         [Description("Is 1853 harmless? / 是否开启1853(洗手液)无害?")]
-        public bool harmless_1853 { get; set; } = true;
+        public bool Harmless1853 { get; set; } = true;
 
 
         /// /////////////////////////////////////////////////
         [Description("SCP静止回血？")]
-        public bool heal_scp { get; set; } = true;
+        public bool EnableHealSCP { get; set; } = true;
 
 
-        [Description("等待多少秒后持续回血")]
-        public float heal_scp_secend { get; set; } = 6;
+        [Description("等待多少秒后开始回血")]
+        public float HealSCPSecend { get; set; } = 6;
 
         [Description("受伤检测")]
-        public float heal_atk_secend { get; set; } = 2;
+        public float HealATKSecend { get; set; } = 2;
 
         [Description("回血量")]
-        public int heal_scp_x { get; set; } = 2;
+        public int HealSCPQuantity { get; set; } = 2;
 
         /// /////////////////////////////////////////////////
         [Description("开启硬币抽卡?")]
-        public bool coin { get; set; } = true;
+        public bool Coin { get; set; } = true;
     }
 }

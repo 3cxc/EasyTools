@@ -50,13 +50,13 @@ namespace EasyTools.Utils
                                 // 检测是否正在受伤
                                 if (_lastDamageTime.TryGetValue(p, out var lastDamageTime))
                                 {
-                                    if (DateTime.UtcNow - lastDamageTime < TimeSpan.FromSeconds(CustomEventHandler.Config.heal_atk_secend)) { canceled = true; }
+                                    if (DateTime.UtcNow - lastDamageTime < TimeSpan.FromSeconds(CustomEventHandler.Config.HealATKSecend)) { canceled = true; }
                                 }
 
-                                if (!canceled && DateTime.UtcNow - last.time > TimeSpan.FromSeconds(CustomEventHandler.Config.heal_scp_secend))
+                                if (!canceled && DateTime.UtcNow - last.time > TimeSpan.FromSeconds(CustomEventHandler.Config.HealSCPSecend))
                                 {
                                     float old_health = p.Health;
-                                    float new_health = old_health + CustomEventHandler.Config.heal_scp_x;
+                                    float new_health = old_health + CustomEventHandler.Config.HealSCPQuantity;
                                     if (new_health <= p.MaxHealth)
                                     {
                                         p.Health = new_health;

@@ -52,7 +52,7 @@ namespace EasyTools.Events
                     Timing.RunCoroutine(Util.AutoServerBroadcast());
                 }
 
-                if (Config.heal_scp)
+                if (Config.EnableHealSCP)
                 {
                     Timing.RunCoroutine(ScpReal.AutoReal());
                 }
@@ -82,9 +82,10 @@ namespace EasyTools.Events
             if (Config.EnableLogger)
             {
                 string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
+                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.ini");
                 Log.Info(playerInfo);
 
-                File.AppendAllText(Config.LoggerSavePath, playerInfo + Environment.NewLine);
+                File.AppendAllText(path, playerInfo + Environment.NewLine);
             }
             if (BadgeConfig.Enable)
             {
@@ -102,9 +103,10 @@ namespace EasyTools.Events
             if (Config.EnableLogger)
             {
                 string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
+                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.ini");
                 Log.Info(playerInfo);
 
-                File.AppendAllText(Config.LoggerSavePath, playerInfo + Environment.NewLine);
+                File.AppendAllText(path, playerInfo + Environment.NewLine);
             }
 
             if (BadgeConfig.Enable)
@@ -116,7 +118,7 @@ namespace EasyTools.Events
 
         public override void OnPlayerHurting(PlayerHurtingEventArgs ev)
         {
-            if (Config.harmless_207)
+            if (Config.Harmless207)
             {
                 if (ev.DamageHandler is UniversalDamageHandler && ev.DamageHandler.DeathScreenText.Contains("SCP-207"))
                 {
@@ -124,7 +126,7 @@ namespace EasyTools.Events
                 }
             }
 
-            if (Config.harmless_1853)
+            if (Config.Harmless1853)
             {
                 if (ev.DamageHandler is UniversalDamageHandler && ev.DamageHandler.DeathScreenText.Contains("poison"))
                 {
@@ -258,12 +260,13 @@ namespace EasyTools.Events
 
 
                 string note = $"Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
+                string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.ini");
                 Log.Info(note);
                 try
                 {
-                    if (!File.Exists(Config.AdminLogPath))
+                    if (!File.Exists(path))
                     {
-                        FileStream fs1 = new(Config.AdminLogPath, FileMode.Create, FileAccess.Write);
+                        FileStream fs1 = new(path, FileMode.Create, FileAccess.Write);
                         StreamWriter sw = new(fs1);
                         sw.WriteLine(note);
                         sw.Close();
@@ -271,7 +274,7 @@ namespace EasyTools.Events
                     }
                     else
                     {
-                        FileStream fs = new(Config.AdminLogPath, FileMode.Append, FileAccess.Write);
+                        FileStream fs = new(path, FileMode.Append, FileAccess.Write);
                         StreamWriter sr = new(fs);
                         sr.WriteLine(note);
                         sr.Close();
