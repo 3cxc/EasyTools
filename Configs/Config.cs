@@ -71,10 +71,10 @@ namespace EasyTools.Configs
         public bool EnableLogger { get; set; } = true;
 
         [Description("Player logger settings / 玩家日志保存路径")]
-        public string PlayerLogPath { get; set; } = Path.Combine(PathManager.Configs.FullName ?? Environment.CurrentDirectory, @$"{Server.Port}.txt");
+        public string PlayerLogPath { get; set; } = Path.Combine(PathManager.Configs.FullName ?? Environment.CurrentDirectory, "/JoinLogs");
 
         [Description("Management logger settings / 管理日志保存路径")]
-        public string AdminLogPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        public string AdminLogPath { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "/AdminLogs");
 
         /// /////////////////////////////////////////////////
         [Description("Is 207 harmless? / 是否开启207(可乐)无害?")]
