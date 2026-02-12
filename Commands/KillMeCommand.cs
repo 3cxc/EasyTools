@@ -8,7 +8,7 @@ using System;
 namespace EasyTools.Commands
 {
     [CommandHandler(typeof(ClientCommandHandler))]
-    public class RescueCommand : ICommand
+    public class KillMeCommand : ICommand
     {
         public string Command => "killme";
 
