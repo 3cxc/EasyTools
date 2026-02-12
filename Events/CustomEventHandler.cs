@@ -1,23 +1,31 @@
 ﻿using CommandSystem.Commands.RemoteAdmin.Decontamination;
+using EasyTools.BadgeSystem;
 using EasyTools.Configs;
 using EasyTools.Utils;
 using GameCore;
+using HintServiceMeow.UI.Utilities;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Wrappers;
 using MEC;
+using NewXp.IniApi;
 using PlayerRoles;
 using PlayerStatsSystem;
+using RemoteAdmin.Communication;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.LowLevel;
 using static Broadcast;
+using static UnityEngine.GraphicsBuffer;
 using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.Events
@@ -30,6 +38,7 @@ namespace EasyTools.Events
 
         public static BadgeConfig BadgeConfig;
         public static CoroutineHandle Badge_Coroutine;
+
         public override void OnServerWaitingForPlayers()
         {
             base.OnServerWaitingForPlayers();
@@ -74,8 +83,7 @@ namespace EasyTools.Events
 
             if (Config.EnableLogger)
             {
-                string playerIP = ev.Player.IpAddress;
-                string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {playerIP} | Steam64ID: {ev.Player.UserId}";
+                string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
                 Log.Info(playerInfo);
 
                 File.AppendAllText(Config.LoggerSavePath, playerInfo + Environment.NewLine);
@@ -86,6 +94,21 @@ namespace EasyTools.Events
             }
 
         }
+
+        public override void OnPlayerLeft(PlayerLeftEventArgs ev)
+        {
+            Player player = ev.Player;
+
+            if (player == null || string.IsNullOrEmpty(player.UserId)) return;
+
+            if (Config.EnableLogger)
+            {
+                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
+                Log.Info(playerInfo);
+
+                File.AppendAllText(Config.LoggerSavePath, playerInfo + Environment.NewLine);
+            }
+
             if (BadgeConfig.Enable)
             {
                 Badge.Remove(player);
@@ -109,22 +132,6 @@ namespace EasyTools.Events
                 {
                     ev.IsAllowed = false;
                 }
-            }
-        }
-
-        public override void OnPlayerLeft(PlayerLeftEventArgs ev)
-        {
-            Player player = ev.Player;
-
-            if (player == null || string.IsNullOrEmpty(player.UserId)) return;
-
-            if (Config.EnableLogger)
-            {
-                string playerIP = ev.Player.IpAddress;
-                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {playerIP} | Steam64ID: {ev.Player.UserId}";
-                Log.Info(playerInfo);
-
-                File.AppendAllText(Config.LoggerSavePath, playerInfo + Environment.NewLine);
             }
         }
 
