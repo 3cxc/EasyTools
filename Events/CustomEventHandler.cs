@@ -141,26 +141,28 @@ namespace EasyTools.Events
             }
         }
 
-        public static bool scp_3114_spawned = false; //用以确保不会重复生成SCP-3114
+        public static volatile bool allow_spawn_scp_3114 = true; //用以确保不会重复生成SCP-3114
 
         public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
         {
-            if (CustomRoleConfig.spawn_scp_3114 && !scp_3114_spawned && Player.ReadyList.Count() >= CustomRoleConfig.spawn_scp_3114_limit)
+            if (CustomRoleConfig.spawn_scp_3114 && allow_spawn_scp_3114)
             {
-                foreach (Player p in Player.ReadyList)
+                if (Player.ReadyList.Count() >= CustomRoleConfig.spawn_scp_3114_limit)
                 {
-                    bool weaponIndex = UnityEngine.Random.Range(0, 10) == 3;
-                    if (weaponIndex)
+                    foreach (Player p in Player.ReadyList)
                     {
-                        Timing.CallDelayed(0.5f, () =>
+                        if ((UnityEngine.Random.Range(0, 10) == 3))
                         {
-                            ev.Player.Role = RoleTypeId.Scp3114;
-                            ev.IsAllowed = true;
-                            scp_3114_spawned = true;
-                        });
+                            Timing.CallDelayed(0.5f, () =>
+                            {
+                                ev.Player.Role = RoleTypeId.Scp3114;
+                                ev.IsAllowed = true;
+                                allow_spawn_scp_3114 = false;
+                            });
+                        }
                     }
                 }
-                scp_3114_spawned = true;
+                allow_spawn_scp_3114 = false;
             }
         }
 
