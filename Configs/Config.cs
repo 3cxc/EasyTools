@@ -63,9 +63,6 @@ namespace EasyTools.Configs
         [Description("粉糖生成概率(默认50%)")]
         public int PinkCandyWeight { get; set; } = 2;
 
-        [Description("人类阵营重生获得粉糖?(默认关闭)")]
-        public bool PinkCandyRespawn { get; set; } = false;
-
         /// /////////////////////////////////////////////////
         [Description("Logger module settings / 日志模块设置")]
         public bool EnableLogger { get; set; } = true;
