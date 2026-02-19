@@ -202,11 +202,11 @@ namespace EasyTools.Events
                 });
             }
 
-            if (Config.PinkCandyRespawn && Player.IsHuman)
+            if (Config.EnableRoundCoin && Player.IsHuman)
             {
                 Timing.CallDelayed(0.5f, () =>
                 {
-                    Player.GiveCandy(InventorySystem.Items.Usables.Scp330.CandyKindID.Pink, ItemAddReason.AdminCommand);
+                    Player.AddItem(ItemType.Coin);
                 });
             }
 
