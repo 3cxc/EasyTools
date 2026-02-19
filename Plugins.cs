@@ -54,7 +54,7 @@ namespace EasyTools
 
         public override string Author => "3cxc";
 
-        public override System.Version Version => new(1, 0, 0);
+        public override System.Version Version => new(1, 0, 1);
 
         public override System.Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 
