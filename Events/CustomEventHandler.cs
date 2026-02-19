@@ -335,7 +335,7 @@ namespace EasyTools.Events
             string rewardName = "";
             bool success = false;
 
-            // 概率判断（从高到低）
+            // 概率判断（从低到高）
             if (randomValue < 0.3f) // 0.3% 变成SCP
             {
                 int scpType = UnityEngine.Random.Range(0, 4);
@@ -366,28 +366,17 @@ namespace EasyTools.Events
             }
             else if (randomValue < 1f && !success) // 0.7% 特殊武器
             {
-                int weaponIndex = UnityEngine.Random.Range(0, 3);
-
-                switch (weaponIndex)
+                if(UnityEngine.Random.Range(0, 2) == 0)
                 {
-                    case 0: // 127
-                        player.AddItem(ItemType.GunSCP127);
-                        rewardName = "获得了127";
-                        break;
-                    case 1: // 3X
-                        player.AddItem(ItemType.ParticleDisruptor);
-                        rewardName = "获得了3X";
-                        break;
-                    case 2: // 电炮
-                        player.AddItem(ItemType.MicroHID);
-                        rewardName = "获得了电炮";
-                        break;
-                    default:
-                        player.AddItem(ItemType.GunSCP127);
-                        rewardName = "获得了127";
-                        break;
+                    player.AddItem(ItemType.ParticleDisruptor);
+                    rewardName = "获得了3X";
+                    success = true;
+                }else
+                {
+                    player.AddItem(ItemType.GunSCP127);
+                    rewardName = "获得了127";
+                    success = true;
                 }
-                success = true;
             }
             else if (randomValue < 5f && !success) // 4% 黑卡
             {
@@ -422,7 +411,32 @@ namespace EasyTools.Events
                 }
                 success = true;
             }
-            else if (randomValue < 35f && !success) // 10% 医疗
+            else if (randomValue < 35f && !success) // 10% 红卡
+            {
+                player.AddItem(ItemType.KeycardFacilityManager);
+                rewardName = "获得了设施总监卡";
+                success = true;
+            }
+            else if (randomValue < 45f && !success) // 10% 再来一次
+            {
+                player.AddItem(ItemType.Coin);
+                rewardName = "又获得了一个硬币";
+                success = true;
+            }
+            else if (randomValue < 55f && !success) // 10% 随机传送
+            {
+                foreach (Player p in Player.ReadyList)
+                {
+                    if (p.IsSCP && p.Role != RoleTypeId.Scp079)
+                    {
+                        player.Position = p.Position + Vector3.right;
+                        player.Rotation = p.Rotation;
+                    }
+                }
+                rewardName = "被传送到SCP旁边";
+                success = true;
+            }
+            else if (randomValue < 70f && !success) // 15% 医疗
             {
                 bool healthIndex = UnityEngine.Random.Range(0, 2) == 0;
 
@@ -437,51 +451,20 @@ namespace EasyTools.Events
                 rewardName = "获得了医疗物品";
                 success = true;
             }
-            else if (randomValue < 45f && !success) // 10% 红卡
-            {
-                player.AddItem(ItemType.KeycardFacilityManager);
-                rewardName = "获得了设施总监卡";
-                success = true;
-            }
-            else if (randomValue < 60f && !success) // 15% 随机传送
-            {
-                foreach (Player p in Player.ReadyList)
-                {
-                    if (p.IsSCP)
-                    {
-                        player.Position = p.Position + Vector3.right;
-                        player.Rotation = p.Rotation;
-                    }
-                }
-                rewardName = "被传送到SCP旁边";
-                success = true;
-            }
-            else if (randomValue < 80f && !success) // 20% 手雷
+            else if (randomValue < 90f && !success) // 20% 手雷
             {
                 player.AddItem(ItemType.GrenadeHE);
                 rewardName = "获得了手雷";
                 success = true;
             }
-            else if (!success) // 20% 老头空间
+            else // 10% 什么都没有
             {
-                if (!PocketDimension.IsPlayerInside(player))
-                {
-                    PocketDimension.ForceInside(player);
-                    rewardName = "传送到老头空间";
-                }
-                else
-                {
-                    PocketDimension.ForceExit(player);
-                    rewardName = "离开了老头空间";
-                }
+                rewardName = "损失了一个硬币";
                 success = true;
             }
 
             // 通知玩家
-            if (success)
-            {
-                Server.SendBroadcast($"\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {player.Nickname} 通过抛硬币{rewardName}！</color></size></b>", 3);
-            }
+            Server.SendBroadcast($"\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {player.Nickname} 通过抛硬币{rewardName}！</color></size></b>", 3);
 
         }
 
