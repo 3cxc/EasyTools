@@ -115,8 +115,8 @@ namespace EasyTools.Events
 
             if (Config.EnableLogger)
             {
-                string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.ini");
+                string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
+                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
                 File.AppendAllText(path, playerInfo + Environment.NewLine);
@@ -146,8 +146,8 @@ namespace EasyTools.Events
 
             if (Config.EnableLogger)
             {
-                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.ini");
+                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
+                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
                 File.AppendAllText(path, playerInfo + Environment.NewLine);
@@ -227,12 +227,17 @@ namespace EasyTools.Events
                 });
             }
 
-            if (Config.EnableRoundCoin && Player.IsHuman)
+            if (Config.EnableRoundCoin)
             {
-                Timing.CallDelayed(0.5f, () =>
+                if (Player.Role == RoleTypeId.ClassD || Player.Role == RoleTypeId.FacilityGuard || Player.Role == RoleTypeId.Scientist)
                 {
-                    Player.AddItem(ItemType.Coin);
-                });
+                    Timing.CallDelayed(0.5f, () =>
+                    {
+                        Player.AddItem(ItemType.Coin);
+                    });
+                }
+            }
+        }
 
         public override void OnPlayerDeath(PlayerDeathEventArgs ev)
         {
@@ -242,10 +247,8 @@ namespace EasyTools.Events
 
             bool tgtwasSCP = ev.Player.IsSCP && ev.Player.Role != RoleTypeId.Scp0492;
 
-
             // 给击杀者添加经验
             PlayerData data = ev.Player.GetData();
-
 
             if (tgtwasSCP)
             {
@@ -354,7 +357,7 @@ namespace EasyTools.Events
 
 
                 string note = $"Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.ini");
+                string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.log");
                 Log.Info(note);
                 try
                 {
@@ -434,22 +437,14 @@ namespace EasyTools.Events
             }
             else if (randomValue < 1f && !success) // 0.7% 特殊武器
             {
-                if(UnityEngine.Random.Range(0, 2) == 0)
-                {
-                    player.AddItem(ItemType.ParticleDisruptor);
-                    rewardName = "获得了3X";
-                    success = true;
-                }else
-                {
-                    player.AddItem(ItemType.GunSCP127);
-                    rewardName = "获得了127";
-                    success = true;
-                }
+                player.AddItem(ItemType.GunSCP127);
+                rewardName = "获得了127";
+                success = true;
             }
             else if (randomValue < 5f && !success) // 4% 黑卡
             {
-                player.AddItem(ItemType.KeycardO5);
-                rewardName = "获得了O5卡";
+                player.AddItem(ItemType.KeycardMTFCaptain);
+                rewardName = "获得了指挥官卡";
                 success = true;
             }
             else if (randomValue < 10f && !success) // 5% 可乐
@@ -458,31 +453,25 @@ namespace EasyTools.Events
                 rewardName = "获得了可乐";
                 success = true;
             }
-            else if (randomValue < 15f && !success) // 5% 粉糖
-            {
-                player.GiveCandy(InventorySystem.Items.Usables.Scp330.CandyKindID.Pink, ItemAddReason.Undefined);
-                rewardName = "获得了粉糖";
-                success = true;
-            }
             else if (randomValue < 25f && !success) // 10% 枪
             {
                 bool weaponIndex = UnityEngine.Random.Range(0, 2) == 0;
                 if (weaponIndex)
                 {
-                    player.AddItem(ItemType.GunFRMG0);
+                    player.AddItem(ItemType.GunE11SR);
                     rewardName = "获得了狗官枪";
                 }
                 else
                 {
-                    player.AddItem(ItemType.GunLogicer);
+                    player.AddItem(ItemType.GunAK);
                     rewardName = "获得了大机枪";
                 }
                 success = true;
             }
             else if (randomValue < 35f && !success) // 10% 红卡
             {
-                player.AddItem(ItemType.KeycardFacilityManager);
-                rewardName = "获得了设施总监卡";
+                player.AddItem(ItemType.KeycardMTFOperative);
+                rewardName = "获得了中士卡";
                 success = true;
             }
             else if (randomValue < 45f && !success) // 10% 再来一次
@@ -504,7 +493,7 @@ namespace EasyTools.Events
                 rewardName = "被传送到SCP旁边";
                 success = true;
             }
-            else if (randomValue < 70f && !success) // 15% 医疗
+            else if (randomValue < 75f && !success) // 20% 医疗
             {
                 bool healthIndex = UnityEngine.Random.Range(0, 2) == 0;
 
@@ -519,13 +508,7 @@ namespace EasyTools.Events
                 rewardName = "获得了医疗物品";
                 success = true;
             }
-            else if (randomValue < 90f && !success) // 20% 手雷
-            {
-                player.AddItem(ItemType.GrenadeHE);
-                rewardName = "获得了手雷";
-                success = true;
-            }
-            else // 10% 什么都没有
+            else // 25% 什么都没有
             {
                 rewardName = "损失了一个硬币";
                 success = true;

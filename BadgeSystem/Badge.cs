@@ -10,8 +10,8 @@ namespace EasyTools.BadgeSystem
 {
     public class Badge
     {
-        public static string[] FMoreColo = new string[]
-        {
+        public static string[] FMoreColo =
+        [
             "pink",
             "silver",
             "cyan",
@@ -47,7 +47,7 @@ namespace EasyTools.BadgeSystem
             "mint",
             "army_green",
             "pumpkin"
-        };
+        ];
 
         public static List<Player> rainbw = new List<Player>();
 
