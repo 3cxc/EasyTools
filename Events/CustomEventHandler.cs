@@ -258,6 +258,25 @@ namespace EasyTools.Events
 
             data.PlayerLevel = LevelUtils.GetLevelFromXp(data.PlayerXp, 1);
             LevelUtils.UpdatePlayerNameWithLevelPrefix(ev.Attacker);
+        }
+
+        public override void OnPlayerDeath(PlayerDeathEventArgs ev)
+        {
+            // 避免处理非玩家击杀或无效情况
+            if (ev.Attacker == null || ev.Player == null)
+                return;
+
+            bool tgtwasSCP = ev.Player.IsSCP && ev.Player.Role != RoleTypeId.Scp0492;
+
+
+            // 给击杀者添加经验
+            PlayerData data = ev.Player.GetData();
+
+
+            if (tgtwasSCP)
+            {
+                data.PlayerXp += 50.0;
+            }
 
         }
 
