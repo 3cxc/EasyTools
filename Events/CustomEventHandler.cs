@@ -100,8 +100,8 @@ namespace EasyTools.Events
 
             if (Config.EnableLogger)
             {
-                string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.ini");
+                string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
+                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
                 File.AppendAllText(path, playerInfo + Environment.NewLine);
@@ -123,8 +123,8 @@ namespace EasyTools.Events
 
             if (Config.EnableLogger)
             {
-                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.ini");
+                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
+                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
                 File.AppendAllText(path, playerInfo + Environment.NewLine);
@@ -295,7 +295,7 @@ namespace EasyTools.Events
 
 
                 string note = $"Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.ini");
+                string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.log");
                 Log.Info(note);
                 try
                 {
