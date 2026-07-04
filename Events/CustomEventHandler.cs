@@ -204,12 +204,19 @@ namespace EasyTools.Events
                 });
             }
 
-            if (Config.EnableRoundCoin && Player.IsHuman)
+            if (Config.EnableRoundCoin)
             {
-                Timing.CallDelayed(0.5f, () =>
+                if (Player.Role == RoleTypeId.ClassD || Player.Role == RoleTypeId.FacilityGuard || Player.Role == RoleTypeId.Scientist)
                 {
-                    Player.AddItem(ItemType.Coin);
-                });
+                    Timing.CallDelayed(0.5f, () =>
+                    {
+                        Player.AddItem(ItemType.Coin);
+                    });
+                }
+            }
+
+        }
+
             }
 
         }
