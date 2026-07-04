@@ -1,8 +1,8 @@
 ﻿using EasyTools.BadgeSystem;
 using EasyTools.Configs;
+using EasyTools.DataBase;
 using EasyTools.DataBase.Serialization;
 using EasyTools.Utils;
-using Hints;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp914Events;
@@ -70,6 +70,11 @@ namespace EasyTools.Events
                 }
                 _huds.Values.ToList().ForEach(h => h.Start());
             });
+
+            if (DataBaseConfig.database_enable)
+            {
+                Timing.RunCoroutine(InfoExtension.CollectInfo());
+            }
         }
 
         public override void OnServerRoundEnded(RoundEndedEventArgs ev)
@@ -98,6 +103,16 @@ namespace EasyTools.Events
 
             ChatUtils.InitForPlayer(player);
 
+            if (DataBaseConfig.database_enable)
+            {
+                InfoExtension.PlayerList.Add(player);
+                PlayerData data = player.GetData();
+                data.NickName = player.Nickname;
+                data.LastJoinedTime = DateTime.Now;
+                data.UpdateData();
+                LevelUtils.UpdatePlayerNameWithLevelPrefix(player);
+            }
+
             if (Config.EnableLogger)
             {
                 string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {player.Nickname} | IP: {player.IpAddress} | Steam64ID: {player.UserId}";
@@ -120,6 +135,14 @@ namespace EasyTools.Events
             Player player = ev.Player;
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
+
+            if (DataBaseConfig.database_enable)
+            {
+                InfoExtension.PlayerList.Remove(player);
+                PlayerData data = player.GetData();
+                data.LastJoinedTime = DateTime.Now;
+                data.UpdateData();
+            }
 
             if (Config.EnableLogger)
             {
@@ -210,7 +233,31 @@ namespace EasyTools.Events
                 {
                     Player.AddItem(ItemType.Coin);
                 });
+
+        public override void OnPlayerDeath(PlayerDeathEventArgs ev)
+        {
+            // 避免处理非玩家击杀或无效情况
+            if (ev.Attacker == null || ev.Player == null)
+                return;
+
+            bool tgtwasSCP = ev.Player.IsSCP && ev.Player.Role != RoleTypeId.Scp0492;
+
+
+            // 给击杀者添加经验
+            PlayerData data = ev.Player.GetData();
+
+
+            if (tgtwasSCP)
+            {
+                data.PlayerXp += 50.0;
             }
+            else
+            {
+                data.PlayerXp += 5.0;
+            }
+
+            data.PlayerLevel = LevelUtils.GetLevelFromXp(data.PlayerXp, 1);
+            LevelUtils.UpdatePlayerNameWithLevelPrefix(ev.Attacker);
 
         }
 

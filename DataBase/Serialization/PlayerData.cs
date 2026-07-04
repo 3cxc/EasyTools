@@ -16,6 +16,8 @@ namespace EasyTools.DataBase.Serialization
         public float PlayerDamage { get; set; }
         public int RolePlayed { get; set; }
         public int PlayerShot { get; set; }
+        public double PlayerXp { get; set; }
+        public double PlayerLevel { get; set; }
         [BsonId]
         public string ID { get; set; }
     }

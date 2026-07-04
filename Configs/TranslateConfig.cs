@@ -90,5 +90,12 @@ namespace EasyTools.Configs
             { Scp914KnobSetting.Fine, "精加" },
             { Scp914KnobSetting.VeryFine, "超精加工" }
         };
+        /// <summary>
+        /// 
+        /// </summary>
+        [Description("等级系统_查询失败")]
+        public string LevelCommandFailed { get; set; } = "查询失败，等级系统未启用";
+        [Description("等级系统_查询成功")]
+        public string LevelCommandOk { get; set; } = "您当前的经验值为: ";
     }
 }

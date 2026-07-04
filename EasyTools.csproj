@@ -126,6 +126,7 @@
     <Compile Include="Commands\Chat\BcCommand.cs" />
     <Compile Include="Commands\Chat\CCommand.cs" />
     <Compile Include="Commands\KillMeCommand.cs" />
+    <Compile Include="Commands\Level\XpCommand.cs" />
     <Compile Include="Configs\BadgeConfig.cs" />
     <Compile Include="Configs\Config.cs" />
     <Compile Include="Configs\CustomRoleConfig.cs" />
@@ -142,6 +143,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ChatUtils.cs" />
     <Compile Include="Utils\Ini.cs" />
+    <Compile Include="Utils\LevelUtils.cs" />
     <Compile Include="Utils\Pool\IPool.cs" />
     <Compile Include="Utils\Pool\StringBuilderPool.cs" />
     <Compile Include="Utils\ScpReal.cs" />

@@ -35,6 +35,8 @@ namespace EasyTools.DataBase
                     PlayerDamage = 0,
                     RolePlayed = 0,
                     PlayerShot = 0,
+                    PlayerXp = 0.0,
+                    PlayerLevel = 0.0
                 };
                 using LiteDatabase database = new(CustomEventHandler.DataBaseConfig.database_path);
                 database.GetCollection<PlayerData>("Players").Insert(toInsert);
