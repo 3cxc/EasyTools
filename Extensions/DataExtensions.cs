@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace EasyTools.Extensions
 {
-    public static class InfoExtensions
+    public static class DataExtensions
     {
 
         /// <summary>
