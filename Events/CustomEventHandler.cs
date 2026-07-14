@@ -262,8 +262,8 @@ namespace EasyTools.Events
         public override void OnPlayerDying(PlayerDyingEventArgs ev)
         {
             // 避免处理非玩家击杀或无效情况
-            if (ev.Attacker == null || ev.Player == null)
-                return;
+            //if (ev.Attacker == null || ev.Player == null)
+            //    return;
 
             // 给击杀者添加经验
             PlayerData data = ev.Attacker.GetData();
