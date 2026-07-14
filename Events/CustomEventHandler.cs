@@ -151,6 +151,8 @@ namespace EasyTools.Events
         public override void OnPlayerLeft(PlayerLeftEventArgs ev)
         {
             Player player = ev.Player;
+            string nickName = player.Nickname;
+            string userId = player.UserId;
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
 
@@ -164,7 +166,7 @@ namespace EasyTools.Events
 
             if (Config.EnableLogger)
             {
-                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
+                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {nickName} | Steam64ID: {userId}";
                 string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
