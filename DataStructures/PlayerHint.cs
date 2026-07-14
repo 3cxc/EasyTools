@@ -3,10 +3,10 @@ using HintServiceMeow.Core.Extension;
 using HintServiceMeow.Core.Models.Hints;
 using HintServiceMeow.Core.Utilities;
 using LabApi.Features.Wrappers;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
-namespace EasyTools.DataBase.Serialization
+namespace EasyTools.DataStructures
 {
     public struct PlayerHint : IDisposable
     {

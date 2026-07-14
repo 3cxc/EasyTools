@@ -1,6 +1,6 @@
 ﻿using EasyTools.BadgeSystem;
-using EasyTools.Configs;
-using EasyTools.DataBase.Serialization;
+﻿using EasyTools.Configs;
+using EasyTools.DataStructures;
 using EasyTools.Extensions;
 using EasyTools.Helper;
 using EasyTools.Utils;
@@ -76,7 +76,7 @@ namespace EasyTools.Events
 
             if (DataBaseConfig.database_enable)
             {
-                Timing.RunCoroutine(InfoExtensions.CollectInfo());
+                Timing.RunCoroutine(DataExtensions.CollectInfo());
             }
         }
 
@@ -108,7 +108,7 @@ namespace EasyTools.Events
 
             if (DataBaseConfig.database_enable)
             {
-                InfoExtensions.PlayerList.Add(player);
+                DataExtensions.PlayerList.Add(player);
                 PlayerData data = player.GetData();
                 data.NickName = player.Nickname;
                 data.LastJoinedTime = DateTime.Now;
@@ -158,7 +158,7 @@ namespace EasyTools.Events
 
             if (DataBaseConfig.database_enable)
             {
-                InfoExtensions.PlayerList.Remove(player);
+                DataExtensions.PlayerList.Remove(player);
                 PlayerData data = player.GetData();
                 data.LastJoinedTime = DateTime.Now;
                 data.UpdateData();

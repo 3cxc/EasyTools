@@ -1,6 +1,6 @@
 ﻿using CommandSystem;
 using EasyTools.Configs;
-using EasyTools.DataBase.Serialization;
+using EasyTools.DataStructures;
 using EasyTools.Events;
 using EasyTools.Extensions;
 using LabApi.Features.Wrappers;

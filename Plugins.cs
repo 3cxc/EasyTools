@@ -1,5 +1,4 @@
 ﻿using EasyTools.Configs;
-using EasyTools.DataBase.Serialization;
 using EasyTools.Events;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features;

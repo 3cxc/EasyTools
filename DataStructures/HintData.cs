@@ -1,4 +1,4 @@
-﻿namespace EasyTools.DataBase.Serialization
+﻿namespace EasyTools.DataStructures
 {
     public struct HintData
     {

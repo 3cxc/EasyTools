@@ -1,5 +1,5 @@
-﻿using EasyTools.DataBase;
-using EasyTools.DataBase.Serialization;
+﻿using EasyTools.API;
+using EasyTools.DataStructures;
 using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using LiteDB;

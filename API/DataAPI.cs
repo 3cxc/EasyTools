@@ -1,9 +1,9 @@
-﻿using EasyTools.DataBase.Serialization;
+﻿using EasyTools.DataStructures;
 using EasyTools.Events;
 using LiteDB;
 using System.Collections.Generic;
 
-namespace EasyTools.DataBase
+namespace EasyTools.API
 {
     public static class DataAPI
     {
