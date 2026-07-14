@@ -1,9 +1,8 @@
 ﻿using CommandSystem;
 using EasyTools.Configs;
-using EasyTools.DataBase;
 using EasyTools.DataBase.Serialization;
 using EasyTools.Events;
-using EasyTools.Utils;
+using EasyTools.Extensions;
 using LabApi.Features.Wrappers;
 using System;
 
@@ -37,8 +36,8 @@ namespace EasyTools.Commands.Level
 
             PlayerData data = player.GetData();
             double xp = data.PlayerXp;
-            int level = LevelUtils.GetLevelFromXp(xp, 1);
-            double needXp = LevelUtils.GetXpUntilNextLevel(xp, 1);
+            int level = LevelExtensions.GetLevelFromXp(xp, 1);
+            double needXp = LevelExtensions.GetXpUntilNextLevel(xp, 1);
 
             response = $"你的等级: {level} | 当前经验: {xp} | 升级还需: {needXp} XP";
             return true;

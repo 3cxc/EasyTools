@@ -1,7 +1,8 @@
 ﻿using EasyTools.BadgeSystem;
 using EasyTools.Configs;
-using EasyTools.DataBase;
 using EasyTools.DataBase.Serialization;
+using EasyTools.Extensions;
+using EasyTools.Helper;
 using EasyTools.Utils;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
@@ -61,19 +62,19 @@ namespace EasyTools.Events
             {
                 if (Config.EnableAutoServerMessage)
                 {
-                    Timing.RunCoroutine(Util.AutoServerBroadcast());
+                    Timing.RunCoroutine(ServerBroadcastHelper.AutoServerBroadcast());
                 }
 
                 if (Config.EnableHealSCP)
                 {
-                    Timing.RunCoroutine(ScpReal.AutoReal());
+                    Timing.RunCoroutine(ScpAutoHealHelper.AutoReal());
                 }
                 _huds.Values.ToList().ForEach(h => h.Start());
             });
 
             if (DataBaseConfig.database_enable)
             {
-                Timing.RunCoroutine(InfoExtension.CollectInfo());
+                Timing.RunCoroutine(InfoExtensions.CollectInfo());
             }
         }
 
@@ -105,12 +106,12 @@ namespace EasyTools.Events
 
             if (DataBaseConfig.database_enable)
             {
-                InfoExtension.PlayerList.Add(player);
+                InfoExtensions.PlayerList.Add(player);
                 PlayerData data = player.GetData();
                 data.NickName = player.Nickname;
                 data.LastJoinedTime = DateTime.Now;
                 data.UpdateData();
-                LevelUtils.UpdatePlayerNameWithLevelPrefix(player);
+                player.UpdatePlayerNameWithLevelPrefix();
             }
 
             if (Config.EnableLogger)
@@ -138,7 +139,7 @@ namespace EasyTools.Events
 
             if (DataBaseConfig.database_enable)
             {
-                InfoExtension.PlayerList.Remove(player);
+                InfoExtensions.PlayerList.Remove(player);
                 PlayerData data = player.GetData();
                 data.LastJoinedTime = DateTime.Now;
                 data.UpdateData();

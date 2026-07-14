@@ -1,4 +1,5 @@
-﻿using EasyTools.DataBase.Serialization;
+﻿using EasyTools.DataBase;
+using EasyTools.DataBase.Serialization;
 using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using LiteDB;
@@ -6,9 +7,9 @@ using MEC;
 using System;
 using System.Collections.Generic;
 
-namespace EasyTools.DataBase
+namespace EasyTools.Extensions
 {
-    public static class InfoExtension
+    public static class InfoExtensions
     {
 
         /// <summary>

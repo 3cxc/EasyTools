@@ -22,6 +22,7 @@ namespace EasyTools
             CustomEventHandler.CustomRoleConfig = this.LoadConfig<CustomRoleConfig>("customRoleConfig.yml");
             CustomEventHandler.DataBaseConfig = this.LoadConfig<DataBaseConfig>("dataBaseConfig.yml");
             CustomEventHandler.HUDInfoConfig = this.LoadConfig<HUDInfoConfig>("HUDInfoConfig.yml");
+            CustomEventHandler.CoinConfig = this.LoadConfig<CoinConfig>("coinConfig.yml");
 
             CustomEventHandler.data_914 = new HintData
             (

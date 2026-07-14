@@ -1,12 +1,11 @@
 ﻿using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using MEC;
-using System;
 using System.Collections.Generic;
 
-namespace EasyTools.Utils
+namespace EasyTools.Helper
 {
-    public class Util
+    public static class ServerBroadcastHelper
     {
         public static IEnumerator<float> AutoServerBroadcast()
         {
@@ -18,7 +17,7 @@ namespace EasyTools.Utils
                 }
 
                 //随机公告
-                int tmp = new Random().Next(0, CustomEventHandler.Config.AutoServerMessageText.Count - 1);
+                int tmp = UnityEngine.Random.Range(0, CustomEventHandler.Config.AutoServerMessageText.Count);
 
                 Server.SendBroadcast(CustomEventHandler.Config.AutoServerMessageText[tmp], CustomEventHandler.Config.AutoServerMessageTimer, global::Broadcast.BroadcastFlags.Normal);
                 yield return Timing.WaitForSeconds(CustomEventHandler.Config.AutoServerMessageTime * 60f);

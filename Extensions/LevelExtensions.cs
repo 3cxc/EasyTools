@@ -1,10 +1,9 @@
-﻿using EasyTools.DataBase;
-using LabApi.Features.Wrappers;
+﻿using LabApi.Features.Wrappers;
 using System;
 
-namespace EasyTools.Utils
+namespace EasyTools.Extensions
 {
-    public static class LevelUtils
+    public static class LevelExtensions
     {
         /// <summary>
         /// 根据经验值计算当前等级
@@ -37,7 +36,7 @@ namespace EasyTools.Utils
         }
 
         // 玩家名称更新方法
-        public static void UpdatePlayerNameWithLevelPrefix(Player player)
+        public static void UpdatePlayerNameWithLevelPrefix(this Player player)
         {
             if (player == null || player.IsNpc) return;
 
