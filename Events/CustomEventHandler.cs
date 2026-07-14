@@ -122,8 +122,23 @@ namespace EasyTools.Events
                 string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
-                File.AppendAllText(path, playerInfo + Environment.NewLine);
+                try
+                {
+                    // 递归创建目录
+                    string dir = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+
+                    File.AppendAllText(path, playerInfo + Environment.NewLine);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e.Message);
+                }
             }
+
             if (BadgeConfig.Enable)
             {
                 Badge.Handler(player);
@@ -364,22 +379,14 @@ namespace EasyTools.Events
                 Log.Info(note);
                 try
                 {
-                    if (!File.Exists(path))
+                    // 递归创建目录
+                    string dir = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(dir))
                     {
-                        FileStream fs1 = new(path, FileMode.Create, FileAccess.Write);
-                        StreamWriter sw = new(fs1);
-                        sw.WriteLine(note);
-                        sw.Close();
-                        fs1.Close();
+                        Directory.CreateDirectory(dir);
                     }
-                    else
-                    {
-                        FileStream fs = new(path, FileMode.Append, FileAccess.Write);
-                        StreamWriter sr = new(fs);
-                        sr.WriteLine(note);
-                        sr.Close();
-                        fs.Close();
-                    }
+
+                    File.AppendAllText(path, note + Environment.NewLine);
                 }
                 catch (Exception e)
                 {
