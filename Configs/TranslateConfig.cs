@@ -97,5 +97,10 @@ namespace EasyTools.Configs
         public string LevelCommandFailed { get; set; } = "查询失败，等级系统未启用";
         [Description("等级系统_查询成功")]
         public string LevelCommandOk { get; set; } = "您当前的经验值为: ";
+        /// <summary>
+        /// 
+        /// </summary>
+        public string RewardFailedBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>";
+        public string RewardOkBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {nickName} 通过抛硬币{result}！</color></size></b>";
     }
 }

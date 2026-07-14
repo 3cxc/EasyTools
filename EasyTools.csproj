@@ -128,6 +128,7 @@
     <Compile Include="Commands\KillMeCommand.cs" />
     <Compile Include="Commands\Level\XpCommand.cs" />
     <Compile Include="Configs\BadgeConfig.cs" />
+    <Compile Include="Configs\CoinConfig.cs" />
     <Compile Include="Configs\Config.cs" />
     <Compile Include="Configs\CustomRoleConfig.cs" />
     <Compile Include="Configs\DataBaseConfig.cs" />
@@ -142,6 +143,7 @@
     <Compile Include="Plugins.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ChatUtils.cs" />
+    <Compile Include="Extensions\RewardExtensions.cs" />
     <Compile Include="Utils\Ini.cs" />
     <Compile Include="Extensions\LevelExtensions.cs" />
     <Compile Include="Utils\Pool\IPool.cs" />

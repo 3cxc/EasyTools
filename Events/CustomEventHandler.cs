@@ -37,6 +37,8 @@ namespace EasyTools.Events
 
         public static HUDInfoConfig HUDInfoConfig;
 
+        public static CoinConfig CoinConfig;
+
         public static CoroutineHandle Badge_Coroutine;
 
         public static readonly Dictionary<Player, PlayerHint> _huds = new();
@@ -388,11 +390,12 @@ namespace EasyTools.Events
 
         public override void OnPlayerFlippingCoin(PlayerFlippingCoinEventArgs ev)
         {
-            if (!ev.IsAllowed) return;
-            if (!Config.Coin) return;
+            if (!ev.IsAllowed || !Config.Coin) return;
+
             if (ev.Player.Items.Count() == 8)
             {
-                ev.Player.SendBroadcast($"\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>", 2);
+                ev.Player.SendBroadcast(TranslateConfig.RewardFailedBroadcastTemplate, 2);
+                ev.IsAllowed = false;
                 return;
             }
 
@@ -400,124 +403,15 @@ namespace EasyTools.Events
 
             player.RemoveItem(ItemType.Coin);
 
-            // 生成0-100的随机数
-            float randomValue = UnityEngine.Random.Range(0f, 100f);
+            // 按权重随机选择奖励
+            RewardSetting reward = CoinConfig.Rewards.PickReward();
+            if (reward == null) return;
 
-            // 初始化奖励变量
-            string rewardName = "";
-            bool success = false;
-
-            // 概率判断（从低到高）
-            if (randomValue < 0.3f) // 0.3% 变成SCP
-            {
-                int scpType = UnityEngine.Random.Range(0, 4);
-                switch (scpType)
-                {
-                    case 0:
-                        player.Role = RoleTypeId.Scp939;
-                        rewardName = "变成了狗子";
-                        break;
-                    case 1:
-                        player.Role = RoleTypeId.Scp3114;
-                        rewardName = "变成了3114";
-                        break;
-                    case 2:
-                        player.Role = RoleTypeId.Scp106;
-                        rewardName = "变成了老头";
-                        break;
-                    case 3:
-                        player.Role = RoleTypeId.Scp049;
-                        rewardName = "变成了49";
-                        break;
-                    default:
-                        player.Role = RoleTypeId.Scp939;
-                        rewardName = "变成了狗子";
-                        break;
-                }
-                success = true;
-            }
-            else if (randomValue < 1f && !success) // 0.7% 特殊武器
-            {
-                player.AddItem(ItemType.GunSCP127);
-                rewardName = "获得了127";
-                success = true;
-            }
-            else if (randomValue < 5f && !success) // 4% 黑卡
-            {
-                player.AddItem(ItemType.KeycardMTFCaptain);
-                rewardName = "获得了指挥官卡";
-                success = true;
-            }
-            else if (randomValue < 10f && !success) // 5% 可乐
-            {
-                player.AddItem(ItemType.SCP207);
-                rewardName = "获得了可乐";
-                success = true;
-            }
-            else if (randomValue < 25f && !success) // 10% 枪
-            {
-                bool weaponIndex = UnityEngine.Random.Range(0, 2) == 0;
-                if (weaponIndex)
-                {
-                    player.AddItem(ItemType.GunE11SR);
-                    rewardName = "获得了狗官枪";
-                }
-                else
-                {
-                    player.AddItem(ItemType.GunAK);
-                    rewardName = "获得了大机枪";
-                }
-                success = true;
-            }
-            else if (randomValue < 35f && !success) // 10% 红卡
-            {
-                player.AddItem(ItemType.KeycardMTFOperative);
-                rewardName = "获得了中士卡";
-                success = true;
-            }
-            else if (randomValue < 45f && !success) // 10% 再来一次
-            {
-                player.AddItem(ItemType.Coin);
-                rewardName = "又获得了一个硬币";
-                success = true;
-            }
-            else if (randomValue < 55f && !success) // 10% 随机传送
-            {
-                foreach (Player p in Player.ReadyList)
-                {
-                    if (p.IsSCP && p.Role != RoleTypeId.Scp079)
-                    {
-                        player.Position = p.Position + Vector3.right;
-                        player.Rotation = p.Rotation;
-                    }
-                }
-                rewardName = "被传送到SCP旁边";
-                success = true;
-            }
-            else if (randomValue < 75f && !success) // 20% 医疗
-            {
-                bool healthIndex = UnityEngine.Random.Range(0, 2) == 0;
-
-                if (healthIndex)
-                {
-                    player.AddItem(ItemType.SCP500);
-                }
-                else
-                {
-                    player.AddItem(ItemType.Medkit);
-                }
-                rewardName = "获得了医疗物品";
-                success = true;
-            }
-            else // 25% 什么都没有
-            {
-                rewardName = "损失了一个硬币";
-                success = true;
-            }
+            // 执行奖励
+            string result = player.ApplyReward(reward);
 
             // 通知玩家
-            Server.SendBroadcast($"\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {player.Nickname} 通过抛硬币{rewardName}！</color></size></b>", 3);
-
+            Server.SendBroadcast(TranslateConfig.RewardOkBroadcastTemplate.Replace("{nickName}", player.Nickname).Replace("{result}", result), 3);
         }
 
         public override void OnScp914Activating(Scp914ActivatingEventArgs ev)
