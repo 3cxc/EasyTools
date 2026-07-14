@@ -259,48 +259,37 @@ namespace EasyTools.Events
             }
         }
 
-        public override void OnPlayerDeath(PlayerDeathEventArgs ev)
+        public override void OnPlayerDying(PlayerDyingEventArgs ev)
         {
             // 避免处理非玩家击杀或无效情况
             if (ev.Attacker == null || ev.Player == null)
                 return;
 
-            bool tgtwasSCP = ev.Player.IsSCP && ev.Player.Role != RoleTypeId.Scp0492;
-
             // 给击杀者添加经验
-            PlayerData data = ev.Player.GetData();
+            PlayerData data = ev.Attacker.GetData();
 
-            if (tgtwasSCP)
+            if (ev.Attacker.IsSCP)
             {
-                data.PlayerXp += 50.0;
+                data.PlayerXp += 5.0;
+            }
+            else if (ev.Player.IsSCP)
+            {
+                if (ev.Player.Role == RoleTypeId.Scp0492)
+                {
+                    data.PlayerXp += 30.0;
+                }
+                else
+                {
+                    data.PlayerXp += 50.0;
+                }
             }
             else
             {
                 data.PlayerXp += 5.0;
             }
 
-            data.PlayerLevel = LevelUtils.GetLevelFromXp(data.PlayerXp, 1);
-            LevelUtils.UpdatePlayerNameWithLevelPrefix(ev.Attacker);
-        }
-
-        public override void OnPlayerDeath(PlayerDeathEventArgs ev)
-        {
-            // 避免处理非玩家击杀或无效情况
-            if (ev.Attacker == null || ev.Player == null)
-                return;
-
-            bool tgtwasSCP = ev.Player.IsSCP && ev.Player.Role != RoleTypeId.Scp0492;
-
-
-            // 给击杀者添加经验
-            PlayerData data = ev.Player.GetData();
-
-
-            if (tgtwasSCP)
-            {
-                data.PlayerXp += 50.0;
-            }
-
+            data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, 1);
+            ev.Attacker.UpdatePlayerNameWithLevelPrefix();
         }
 
         public override void OnPlayerHurting(PlayerHurtingEventArgs ev)
