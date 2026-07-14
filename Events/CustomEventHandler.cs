@@ -339,6 +339,15 @@ namespace EasyTools.Events
                     ev.IsAllowed = true;
                 }
             }
+
+            PlayerData data = ev.Player.GetData();
+            data.PlayerXp += 20.0;
+
+            data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, 1);
+            ev.Player.UpdatePlayerNameWithLevelPrefix();
+
+            // 通知玩家
+            ev.Player.SendBroadcast("\n<b><size=25><color=#00CC00>逃脱成功，获得20经验值</color></size></b>", 3);
         }
 
         public override void OnPlayerInteractingScp330(PlayerInteractingScp330EventArgs ev)
