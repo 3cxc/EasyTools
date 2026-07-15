@@ -183,7 +183,7 @@ namespace EasyTools.Events
             }
         }
 
-        public static volatile bool allow_spawn_scp_3114 = true; //用以确保不会重复生成SCP-3114
+        private static volatile bool allow_spawn_scp_3114 = true; //用以确保不会重复生成SCP-3114
 
         public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
         {
