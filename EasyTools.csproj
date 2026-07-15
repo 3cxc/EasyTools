@@ -125,7 +125,7 @@
     <Compile Include="Commands\Chat\AcCommand.cs" />
     <Compile Include="Commands\Chat\BcCommand.cs" />
     <Compile Include="Commands\Chat\CCommand.cs" />
-    <Compile Include="Commands\KillMeCommand.cs" />
+    <Compile Include="Commands\System\KillMeCommand.cs" />
     <Compile Include="Commands\Level\XpCommand.cs" />
     <Compile Include="Commands\Scp\ReplaceScpCommand.cs" />
     <Compile Include="Commands\Scp\SwapAcceptCommand.cs" />

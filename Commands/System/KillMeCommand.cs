@@ -5,7 +5,7 @@ using LabApi.Features.Wrappers;
 using RelativePositioning;
 using System;
 
-namespace EasyTools.Commands
+namespace EasyTools.Commands.System
 {
     [CommandHandler(typeof(ClientCommandHandler))]
     public class KillMeCommand : ICommand
