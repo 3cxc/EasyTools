@@ -1,4 +1,5 @@
 ﻿using EasyTools.Configs;
+using EasyTools.DataStructures;
 using EasyTools.Events;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features;

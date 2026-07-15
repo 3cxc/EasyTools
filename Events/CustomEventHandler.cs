@@ -1,4 +1,3 @@
-﻿using EasyTools.BadgeSystem;
 ﻿using EasyTools.Configs;
 using EasyTools.DataStructures;
 using EasyTools.Extensions;
@@ -64,8 +63,8 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                Badge.rainbw.Clear();
-                Badge_Coroutine = Timing.RunCoroutine(Badge.Rainbw());
+                BadgeExtensions.rainbw.Clear();
+                Badge_Coroutine = Timing.RunCoroutine(BadgeExtensions.Rainbw());
             }
 
             Server.FriendlyFire = false;
@@ -129,6 +128,8 @@ namespace EasyTools.Events
                 data.LastJoinedTime = DateTime.Now;
                 data.UpdateData();
                 player.UpdatePlayerNameWithLevelPrefix();
+                player.ApplyPermission();
+                player.ApplyBadge();
             }
 
             if (Config.EnableLogger)
@@ -152,11 +153,6 @@ namespace EasyTools.Events
                 {
                     Log.Error(e.Message);
                 }
-            }
-
-            if (BadgeConfig.Enable)
-            {
-                Badge.Handler(player);
             }
 
             _huds[player] = new PlayerHint(player, data_914, data_elevator);
@@ -190,7 +186,10 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                Badge.Remove(player);
+                if (BadgeExtensions.rainbw.Contains(player))
+                {
+                    BadgeExtensions.rainbw.Remove(player);
+                }
             }
 
             if (_huds.ContainsKey(player))

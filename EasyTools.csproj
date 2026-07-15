@@ -121,7 +121,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BadgeSystem\Badge.cs" />
+    <Compile Include="Commands\System\BadgeCommand.cs" />
+    <Compile Include="Commands\System\PermissionCommand.cs" />
+    <Compile Include="Extensions\BadgeExtensions.cs" />
     <Compile Include="Commands\Chat\AcCommand.cs" />
     <Compile Include="Commands\Chat\BcCommand.cs" />
     <Compile Include="Commands\Chat\CCommand.cs" />
@@ -148,7 +150,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions\ChatHintExtensions.cs" />
     <Compile Include="Extensions\RewardExtensions.cs" />
-    <Compile Include="Utils\Ini.cs" />
     <Compile Include="Extensions\LevelExtensions.cs" />
     <Compile Include="Utils\Pool\IPool.cs" />
     <Compile Include="Utils\Pool\StringBuilderPool.cs" />
