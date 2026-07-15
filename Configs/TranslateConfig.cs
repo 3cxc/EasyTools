@@ -1,4 +1,4 @@
-﻿using EasyTools.Utils;
+﻿using EasyTools.Extensions;
 using PlayerRoles;
 using Scp914;
 using System.Collections.Generic;
@@ -8,17 +8,17 @@ namespace EasyTools.Configs
 {
     public class TranslateConfig
     {
-        [Description("自救指令_错误")]
-        public string RescueCommandError { get; set; } = "执行指令时发生错误，请稍后再试";
-        [Description("自救指令_失败")]
-        public string RescueCommandFailed { get; set; } = "失败，可能指令未启用或者身份不允许等";
-        [Description("自救指令_成功")]
-        public string RescueCommandOk { get; set; } = "成功";
-        [Description("聊天指令_错误")]
-        public string ChatCommandError { get; set; } = "发送消息时出现错误，请稍后重试";
-        [Description("聊天指令_失败")]
+        [Description("命令未启用时的提示")]
+        public string CommandNotEnabled { get; set; } = "该命令未启用";
+        [Description("当前身份不允许执行命令时的提示")]
+        public string CommandNotAllowed { get; set; } = "当前身份不允许执行该命令";
+        [Description("命令执行失败时的提示")]
+        public string CommandFailed { get; set; } = "执行失败，可能是参数错误等";
+        [Description("命令执行成功时的提示")]
+        public string CommandOk { get; set; } = "执行成功";
+        [Description("聊天信息发送失败时提示")]
         public string ChatCommandFailed { get; set; } = "发送失败，你被禁言或者信息为空或者聊天系统未启用";
-        [Description("聊天指令_成功")]
+        [Description("聊天信息发送成功时提示")]
         public string ChatCommandOk { get; set; } = "发送成功";
         /// <summary>
         /// 
@@ -78,11 +78,11 @@ namespace EasyTools.Configs
         /// 
         /// </summary>
         [Description("电梯显示模板(HEX color写死, {p_operator}表示操作人, 没有的话自动为未知):")]
-        public string elev_template { get; set; } = "[Elevator] 电梯使用者: <color=#B952FA>{p_operator}</color>";
-        [Description("SCP914显示模板(HEX color写死, {mode}表示操作模式, {p_operator}表示操作人, 没有的话自动为未知):")]
-        public string scp914_template { get; set; } = "[Scp914] 已启动! 模式: <color=#F7C73E>{mode}</color>, 操作人: <color=#0080FF>{p_operator}</color>";
-        [Description("SCP914, Rough模式翻译:")]
-        public Dictionary<Scp914KnobSetting, string> scp914_trans { get; set; } = new Dictionary<Scp914KnobSetting, string>()
+        public string ElevatorTemplate { get; set; } = "[Elevator] 电梯使用者: <color=#B952FA>{p_operator}</color>";
+        [Description("SCP-914 显示模板(HEX color写死, {mode}表示操作模式, {p_operator}表示操作人, 没有的话自动为未知):")]
+        public string Scp914Template { get; set; } = "[Scp914] 已启动! 模式: <color=#F7C73E>{mode}</color>, 操作人: <color=#0080FF>{p_operator}</color>";
+        [Description("SCP-914 模式翻译:")]
+        public Dictionary<Scp914KnobSetting, string> Scp914ModeTranslations { get; set; } = new Dictionary<Scp914KnobSetting, string>()
         {
             { Scp914KnobSetting.Rough, "粗加" },
             { Scp914KnobSetting.Coarse, "半粗" },
@@ -90,5 +90,24 @@ namespace EasyTools.Configs
             { Scp914KnobSetting.Fine, "精加" },
             { Scp914KnobSetting.VeryFine, "超精加工" }
         };
+        /// <summary>
+        /// 
+        /// </summary>
+        [Description("等级系统_查询失败")]
+        public string LevelCommandFailed { get; set; } = "查询失败，等级系统未启用";
+        /// <summary>
+        /// 
+        /// </summary>
+        [Description("使用硬币抽卡时背包空间不足提示")]
+        public string RewardFailedBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>";
+        [Description("使用硬币抽卡成功提示")]
+        public string RewardOkBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {nickName} 通过抛硬币{result}！</color></size></b>";
+        /// <summary>
+        /// 
+        /// </summary>
+        [Description("开局三分钟后使用交换指令的禁止提示")]
+        public string SwapCommandTimeLimitBroadcastTemplate { get; set; } = "交换指令只能在开局三分钟内使用";
+        [Description("没有待处理交换请求时提示")]
+        public string SwapCommandNoRequestBroadcastTemplate { get; set; } = "没有待处理的交换请求";
     }
 }

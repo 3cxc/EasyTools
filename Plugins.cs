@@ -1,11 +1,10 @@
 ﻿using EasyTools.Configs;
-using EasyTools.DataBase.Serialization;
+using EasyTools.DataStructures;
 using EasyTools.Events;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features;
 using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
-using System.IO;
 
 namespace EasyTools
 {
@@ -19,28 +18,23 @@ namespace EasyTools
             CustomEventHandler.Config = this.LoadConfig<Config>("config.yml");
             CustomEventHandler.TranslateConfig = this.LoadConfig<TranslateConfig>("translateConfig.yml");
             CustomEventHandler.BadgeConfig = this.LoadConfig<BadgeConfig>("badgeConfig.yml");
-            CustomEventHandler.CustomRoleConfig = this.LoadConfig<CustomRoleConfig>("customRoleConfig.yml");
-            CustomEventHandler.DataBaseConfig = this.LoadConfig<DataBaseConfig>("dataBaseConfig.yml");
+            CustomEventHandler.LevelSystemConfig = this.LoadConfig<LevelSystemConfig>("dataBaseConfig.yml");
             CustomEventHandler.HUDInfoConfig = this.LoadConfig<HUDInfoConfig>("HUDInfoConfig.yml");
+            CustomEventHandler.CoinConfig = this.LoadConfig<CoinConfig>("coinConfig.yml");
 
-            CustomEventHandler.data_914 = new HintData
+            CustomEventHandler.Scp914HintData = new HintData
             (
-                CustomEventHandler.HUDInfoConfig._914_x,
-                CustomEventHandler.HUDInfoConfig._914_y,
-                CustomEventHandler.HUDInfoConfig._914_font
+                CustomEventHandler.HUDInfoConfig.Scp914DisplayX,
+                CustomEventHandler.HUDInfoConfig.Scp914DisplayY,
+                CustomEventHandler.HUDInfoConfig.Scp914FontSize
             );
 
-            CustomEventHandler.data_elevator = new HintData
+            CustomEventHandler.ElevatorHintData = new HintData
             (
-                CustomEventHandler.HUDInfoConfig._elev_x,
-                CustomEventHandler.HUDInfoConfig._elev_y,
-                CustomEventHandler.HUDInfoConfig._elev_font
+                CustomEventHandler.HUDInfoConfig.ElevatorDisplayX,
+                CustomEventHandler.HUDInfoConfig.ElevatorDisplayY,
+                CustomEventHandler.HUDInfoConfig.ElevatorFontSize
             );
-
-            if (!Directory.Exists(CustomEventHandler.BadgeConfig.Pach))
-            {
-                Directory.CreateDirectory(CustomEventHandler.BadgeConfig.Pach);
-            }
         }
 
 
@@ -54,7 +48,7 @@ namespace EasyTools
 
         public override string Author => "3cxc";
 
-        public override System.Version Version => new(1, 0, 1);
+        public override System.Version Version => new(1, 1, 0);
 
         public override System.Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 
@@ -71,8 +65,8 @@ namespace EasyTools
 
             Instance = null;
 
-            foreach (var hud in CustomEventHandler._huds.Values) hud.Dispose();
-            CustomEventHandler._huds.Clear();
+            foreach (var hud in CustomEventHandler.PlayerHuds.Values) hud.Dispose();
+            CustomEventHandler.PlayerHuds.Clear();
         }
 
     }

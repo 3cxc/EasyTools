@@ -1,4 +1,5 @@
-﻿using EasyTools.DataBase.Serialization;
+﻿using EasyTools.API;
+using EasyTools.DataStructures;
 using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using LiteDB;
@@ -6,9 +7,9 @@ using MEC;
 using System;
 using System.Collections.Generic;
 
-namespace EasyTools.DataBase
+namespace EasyTools.Extensions
 {
-    public static class InfoExtension
+    public static class DataExtensions
     {
 
         /// <summary>
@@ -35,8 +36,10 @@ namespace EasyTools.DataBase
                     PlayerDamage = 0,
                     RolePlayed = 0,
                     PlayerShot = 0,
+                    PlayerXp = 0.0,
+                    PlayerLevel = 0.0
                 };
-                using LiteDatabase database = new(CustomEventHandler.DataBaseConfig.database_path);
+                using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
                 database.GetCollection<PlayerData>("Players").Insert(toInsert);
             }
 
@@ -66,7 +69,7 @@ namespace EasyTools.DataBase
                     RolePlayed = 0,
                     PlayerShot = 0,
                 };
-                using LiteDatabase database = new(CustomEventHandler.DataBaseConfig.database_path);
+                using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
                 database.GetCollection<PlayerData>("Players").Insert(toInsert);
             }
 
@@ -77,7 +80,7 @@ namespace EasyTools.DataBase
 
         public static void UpdateData(this PlayerData data)
         {
-            using LiteDatabase database = new(CustomEventHandler.DataBaseConfig.database_path);
+            using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
             database.GetCollection<PlayerData>("Players").Update(data);
         }
 

@@ -1,7 +1,7 @@
 ﻿using LiteDB;
 using System;
 
-namespace EasyTools.DataBase.Serialization
+namespace EasyTools.DataStructures
 {
     [Serializable]
     public class PlayerData
@@ -16,7 +16,20 @@ namespace EasyTools.DataBase.Serialization
         public float PlayerDamage { get; set; }
         public int RolePlayed { get; set; }
         public int PlayerShot { get; set; }
+        public double PlayerXp { get; set; }
+        public double PlayerLevel { get; set; }
+        public PermissionLevel PermissionLevel { get; set; } = PermissionLevel.Player;
+        public string Badge { get; set; } = "";
+        public string BadgeColor { get; set; } = "rainbow";
         [BsonId]
         public string ID { get; set; }
+    }
+
+    public enum PermissionLevel
+    {
+        Player = 0,
+        Moderator = 1,
+        Admin = 2,
+        Owner = 3
     }
 }

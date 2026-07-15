@@ -1,7 +1,7 @@
 ﻿using CommandSystem;
 using EasyTools.Configs;
 using EasyTools.Events;
-using EasyTools.Utils;
+using EasyTools.Extensions;
 using LabApi.Features.Wrappers;
 using System;
 using Log = LabApi.Features.Console.Logger;
@@ -24,7 +24,7 @@ namespace EasyTools.Commands.Chat
 
             if (sender is null || (player = Player.Get(sender)) is null)
             {
-                response = TranslateConfig.ChatCommandError;
+                response = TranslateConfig.CommandNotAllowed;
                 return false;
             }
 
@@ -34,7 +34,7 @@ namespace EasyTools.Commands.Chat
                 return false;
             }
 
-            ChatUtils.SendMessage(player, ChatMessage.MessageType.AdminPrivateChat, $"<noparse>{string.Join(" ", arguments)}</noparse>");
+            player.SendHintMessage(ChatMessage.MessageType.AdminPrivateChat, $"<noparse>{string.Join(" ", arguments)}</noparse>");
 
             Log.Info(player.Nickname + " 发送了 " + arguments.At(0));
             response = TranslateConfig.ChatCommandOk;

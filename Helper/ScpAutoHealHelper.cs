@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace EasyTools.Utils
+namespace EasyTools.Helper
 {
-    public class ScpReal
+    public class ScpAutoHealHelper
     {
 
         private static readonly Dictionary<Player, (Vector3 pos, DateTime time)> _lastMove = [];

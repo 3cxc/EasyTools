@@ -1,8 +1,7 @@
-﻿using EasyTools.BadgeSystem;
-using EasyTools.Configs;
-using EasyTools.DataBase.Serialization;
-using EasyTools.Utils;
-using Hints;
+﻿using EasyTools.Configs;
+using EasyTools.DataStructures;
+using EasyTools.Extensions;
+using EasyTools.Helper;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp914Events;
@@ -30,17 +29,31 @@ namespace EasyTools.Events
 
         public static BadgeConfig BadgeConfig;
 
-        public static CustomRoleConfig CustomRoleConfig;
-
-        public static DataBaseConfig DataBaseConfig;
+        public static LevelSystemConfig LevelSystemConfig;
 
         public static HUDInfoConfig HUDInfoConfig;
 
-        public static CoroutineHandle Badge_Coroutine;
+        public static CoinConfig CoinConfig;
 
-        public static readonly Dictionary<Player, PlayerHint> _huds = new();
+        public static CoroutineHandle BadgeCoroutine;
 
-        public static HintData data_914, data_elevator;
+        public static readonly Dictionary<Player, PlayerHint> PlayerHuds = new();
+
+        public static HintData Scp914HintData, ElevatorHintData;
+
+        public static DateTime RoundStartTime { get; private set; }
+
+        // SCP交换列表
+        public static volatile Dictionary<Player, Player> SwapRequests = new Dictionary<Player, Player>();
+
+        // SCP补位列表
+        public static readonly Dictionary<RoleTypeId, ReplacementEntry> Replacements = new();
+
+        public class ReplacementEntry
+        {
+            public List<Player> Applicants = new();
+            public float ExpireTime; // Time.time + 10f
+        }
 
         public override void OnServerWaitingForPlayers()
         {
@@ -48,8 +61,8 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                Badge.rainbw.Clear();
-                Badge_Coroutine = Timing.RunCoroutine(Badge.Rainbw());
+                BadgeExtensions.rainbw.Clear();
+                BadgeCoroutine = Timing.RunCoroutine(BadgeExtensions.Rainbw());
             }
 
             Server.FriendlyFire = false;
@@ -57,19 +70,26 @@ namespace EasyTools.Events
 
         public override void OnServerRoundStarted()
         {
+            RoundStartTime = DateTime.Now;
+
             Timing.CallDelayed(10f, () =>
             {
                 if (Config.EnableAutoServerMessage)
                 {
-                    Timing.RunCoroutine(Util.AutoServerBroadcast());
+                    Timing.RunCoroutine(ServerBroadcastHelper.AutoServerBroadcast());
                 }
 
                 if (Config.EnableHealSCP)
                 {
-                    Timing.RunCoroutine(ScpReal.AutoReal());
+                    Timing.RunCoroutine(ScpAutoHealHelper.AutoReal());
                 }
-                _huds.Values.ToList().ForEach(h => h.Start());
+                PlayerHuds.Values.ToList().ForEach(h => h.Start());
             });
+
+            if (Config.EnablePlayTime)
+            {
+                Timing.RunCoroutine(DataExtensions.CollectInfo());
+            }
         }
 
         public override void OnServerRoundEnded(RoundEndedEventArgs ev)
@@ -78,7 +98,7 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                Timing.KillCoroutines(Badge_Coroutine);
+                Timing.KillCoroutines(BadgeCoroutine);
             }
 
             if (Config.EnableFriendFire)
@@ -96,34 +116,72 @@ namespace EasyTools.Events
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
 
-            ChatUtils.InitForPlayer(player);
+            player.InitChatHint();
 
-            if (Config.EnableLogger)
+            DataExtensions.PlayerList.Add(player);
+            PlayerData data = player.GetData();
+            data.NickName = player.Nickname;
+            data.LastJoinedTime = DateTime.Now;
+            data.UpdateData();
+
+            if (LevelSystemConfig.EnableLevelSystem)
+            {
+                player.UpdatePlayerNameWithLevelPrefix();
+            }
+
+            if (Config.EnableAdmin)
+            {
+                player.ApplyPermission();
+            }
+
+            if (BadgeConfig.Enable)
+            {
+                player.ApplyBadge();
+            }
+
+            if (Config.EnablePlayerLogger)
             {
                 string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
                 string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
-                File.AppendAllText(path, playerInfo + Environment.NewLine);
-            }
-            if (BadgeConfig.Enable)
-            {
-                Badge.Handler(player);
+                try
+                {
+                    // 递归创建目录
+                    string dir = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+
+                    File.AppendAllText(path, playerInfo + Environment.NewLine);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e.Message);
+                }
             }
 
-            _huds[player] = new PlayerHint(player, data_914, data_elevator);
+            PlayerHuds[player] = new PlayerHint(player, Scp914HintData, ElevatorHintData);
 
         }
 
         public override void OnPlayerLeft(PlayerLeftEventArgs ev)
         {
             Player player = ev.Player;
+            string nickName = player.Nickname;
+            string userId = player.UserId;
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
 
-            if (Config.EnableLogger)
+            DataExtensions.PlayerList.Remove(player);
+            PlayerData data = player.GetData();
+            data.LastJoinedTime = DateTime.Now;
+            data.UpdateData();
+
+            if (Config.EnablePlayerLogger)
             {
-                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
+                string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {nickName} | Steam64ID: {userId}";
                 string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
 
@@ -132,37 +190,74 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                Badge.Remove(player);
+                if (BadgeExtensions.rainbw.Contains(player))
+                {
+                    BadgeExtensions.rainbw.Remove(player);
+                }
             }
 
-            if (_huds.ContainsKey(player))
+            if (PlayerHuds.ContainsKey(player))
             {
-                _huds.Remove(player);
+                PlayerHuds.Remove(player);
+            }
+
+            if (Config.EnableSCPReplace)
+            {
+                // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
+                foreach (var entry in Replacements.Values)
+                    entry.Applicants.Remove(player);
+
+                if (player.IsSCP && player.Health > 0)
+                {
+                    var role = player.Role;
+
+                    Replacements[role] = new ReplacementEntry
+                    {
+                        ExpireTime = Time.time + Config.SCPReplaceTime
+                    };
+
+                    Timing.CallDelayed(Config.SCPReplaceTime, () => ExecuteReplacement(role));
+                }
             }
         }
 
-        public static volatile bool allow_spawn_scp_3114 = true; //用以确保不会重复生成SCP-3114
+        private void ExecuteReplacement(RoleTypeId role)
+        {
+            if (!Replacements.TryGetValue(role, out var entry))
+                return;
+
+            // 从补位名单中筛选仍在线的人类玩家
+            var valid = entry.Applicants.Where(p => p != null && p.IsHuman).ToList();
+
+            if (valid.Count == 0)
+            {
+                Server.SendBroadcast($"<color=orange>{role} 补位无人申请，该角色空缺。</color>", 5);
+                return;
+            }
+
+            // 随机选择
+            var chosen = valid[UnityEngine.Random.Range(0, valid.Count)];
+            chosen.Role = role;
+
+            Server.SendBroadcast($"<color=green>补位成功！{chosen.Nickname} 成为了 {role}。</color>", 10);
+            Log.Info($"{chosen.Nickname} 补位成为 {role}");
+        }
+
+        private static volatile bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114
 
         public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
         {
-            if (CustomRoleConfig.spawn_scp_3114 && allow_spawn_scp_3114)
+            if (Config.EnableSCP3114 && AllowSpawnScp3114)
             {
-                if (Player.ReadyList.Count() >= CustomRoleConfig.spawn_scp_3114_limit)
+                if (Player.ReadyList.Count() >= Config.SCP3114Limit && UnityEngine.Random.value < Config.SCP3114Weight)
                 {
-                    foreach (Player p in Player.ReadyList)
+                    AllowSpawnScp3114 = false;
+                    Timing.CallDelayed(0.5f, () =>
                     {
-                        if ((UnityEngine.Random.Range(0, 10) == 3))
-                        {
-                            Timing.CallDelayed(0.5f, () =>
-                            {
-                                ev.Player.Role = RoleTypeId.Scp3114;
-                                ev.IsAllowed = true;
-                                allow_spawn_scp_3114 = false;
-                            });
-                        }
-                    }
+                        ev.Player.Role = RoleTypeId.Scp3114;
+                        ev.IsAllowed = true;
+                    });
                 }
-                allow_spawn_scp_3114 = false;
             }
         }
 
@@ -204,7 +299,7 @@ namespace EasyTools.Events
                 });
             }
 
-            if (Config.EnableRoundCoin)
+            if (CoinConfig.EnableRoundCoin)
             {
                 if (Player.Role == RoleTypeId.ClassD || Player.Role == RoleTypeId.FacilityGuard || Player.Role == RoleTypeId.Scientist)
                 {
@@ -214,11 +309,43 @@ namespace EasyTools.Events
                     });
                 }
             }
-
         }
 
+        public override void OnPlayerDying(PlayerDyingEventArgs ev)
+        {
+            if (!LevelSystemConfig.EnableLevelSystem) return;
+
+            // 避免处理非玩家击杀或无效情况
+            if (ev.Attacker == null || ev.Player == null)
+                return;
+
+            if (ev.Player.IsDummy && !LevelSystemConfig.CountBot) return;
+
+            // 给击杀者添加经验
+            PlayerData data = ev.Attacker.GetData();
+
+            if (ev.Attacker.IsSCP)
+            {
+                data.PlayerXp += LevelSystemConfig.SCPKillHumanXp;
+            }
+            else if (ev.Player.IsSCP)
+            {
+                if (ev.Player.Role == RoleTypeId.Scp0492)
+                {
+                    data.PlayerXp += LevelSystemConfig.HumanKillSCP0492Xp;
+                }
+                else
+                {
+                    data.PlayerXp += LevelSystemConfig.HumanKillSCPXp;
+                }
+            }
+            else
+            {
+                data.PlayerXp += LevelSystemConfig.HumanKillHumanXp;
             }
 
+            data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
+            ev.Attacker.UpdatePlayerNameWithLevelPrefix();
         }
 
         public override void OnPlayerHurting(PlayerHurtingEventArgs ev)
@@ -268,6 +395,18 @@ namespace EasyTools.Events
                     ev.IsAllowed = true;
                 }
             }
+
+            if (LevelSystemConfig.EnableLevelSystem)
+            {
+                PlayerData data = ev.Player.GetData();
+                data.PlayerXp += LevelSystemConfig.HumanEscapeXp;
+
+                data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
+                ev.Player.UpdatePlayerNameWithLevelPrefix();
+
+                // 通知玩家
+                ev.Player.SendBroadcast("\n<b><size=25><color=#00CC00>逃脱成功，获得20经验值</color></size></b>", 3);
+            }
         }
 
         public override void OnPlayerInteractingScp330(PlayerInteractingScp330EventArgs ev)
@@ -289,32 +428,24 @@ namespace EasyTools.Events
 
             Player player = Player.Get(sender);
 
-            if (player != null && !string.IsNullOrEmpty(command) && Config.EnableLogger)
+            if (player != null && !string.IsNullOrEmpty(command) && Config.EnableAdminLogger)
             {
                 if (!player.RemoteAdminAccess) return;
 
 
-                string note = $"Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
+                string note = $"[AC] Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
                 string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.log");
                 Log.Info(note);
                 try
                 {
-                    if (!File.Exists(path))
+                    // 递归创建目录
+                    string dir = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(dir))
                     {
-                        FileStream fs1 = new(path, FileMode.Create, FileAccess.Write);
-                        StreamWriter sw = new(fs1);
-                        sw.WriteLine(note);
-                        sw.Close();
-                        fs1.Close();
+                        Directory.CreateDirectory(dir);
                     }
-                    else
-                    {
-                        FileStream fs = new(path, FileMode.Append, FileAccess.Write);
-                        StreamWriter sr = new(fs);
-                        sr.WriteLine(note);
-                        sr.Close();
-                        fs.Close();
-                    }
+
+                    File.AppendAllText(path, note + Environment.NewLine);
                 }
                 catch (Exception e)
                 {
@@ -325,11 +456,12 @@ namespace EasyTools.Events
 
         public override void OnPlayerFlippingCoin(PlayerFlippingCoinEventArgs ev)
         {
-            if (!ev.IsAllowed) return;
-            if (!Config.Coin) return;
+            if (!ev.IsAllowed || !CoinConfig.Enable) return;
+
             if (ev.Player.Items.Count() == 8)
             {
-                ev.Player.SendBroadcast($"\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>", 2);
+                ev.Player.SendBroadcast(TranslateConfig.RewardFailedBroadcastTemplate, 2);
+                ev.IsAllowed = false;
                 return;
             }
 
@@ -337,159 +469,50 @@ namespace EasyTools.Events
 
             player.RemoveItem(ItemType.Coin);
 
-            // 生成0-100的随机数
-            float randomValue = UnityEngine.Random.Range(0f, 100f);
+            // 按权重随机选择奖励
+            RewardSetting reward = CoinConfig.Rewards.PickReward();
+            if (reward == null) return;
 
-            // 初始化奖励变量
-            string rewardName = "";
-            bool success = false;
-
-            // 概率判断（从低到高）
-            if (randomValue < 0.3f) // 0.3% 变成SCP
-            {
-                int scpType = UnityEngine.Random.Range(0, 4);
-                switch (scpType)
-                {
-                    case 0:
-                        player.Role = RoleTypeId.Scp939;
-                        rewardName = "变成了狗子";
-                        break;
-                    case 1:
-                        player.Role = RoleTypeId.Scp3114;
-                        rewardName = "变成了3114";
-                        break;
-                    case 2:
-                        player.Role = RoleTypeId.Scp106;
-                        rewardName = "变成了老头";
-                        break;
-                    case 3:
-                        player.Role = RoleTypeId.Scp049;
-                        rewardName = "变成了49";
-                        break;
-                    default:
-                        player.Role = RoleTypeId.Scp939;
-                        rewardName = "变成了狗子";
-                        break;
-                }
-                success = true;
-            }
-            else if (randomValue < 1f && !success) // 0.7% 特殊武器
-            {
-                player.AddItem(ItemType.GunSCP127);
-                rewardName = "获得了127";
-                success = true;
-            }
-            else if (randomValue < 5f && !success) // 4% 黑卡
-            {
-                player.AddItem(ItemType.KeycardMTFCaptain);
-                rewardName = "获得了指挥官卡";
-                success = true;
-            }
-            else if (randomValue < 10f && !success) // 5% 可乐
-            {
-                player.AddItem(ItemType.SCP207);
-                rewardName = "获得了可乐";
-                success = true;
-            }
-            else if (randomValue < 25f && !success) // 10% 枪
-            {
-                bool weaponIndex = UnityEngine.Random.Range(0, 2) == 0;
-                if (weaponIndex)
-                {
-                    player.AddItem(ItemType.GunE11SR);
-                    rewardName = "获得了狗官枪";
-                }
-                else
-                {
-                    player.AddItem(ItemType.GunAK);
-                    rewardName = "获得了大机枪";
-                }
-                success = true;
-            }
-            else if (randomValue < 35f && !success) // 10% 红卡
-            {
-                player.AddItem(ItemType.KeycardMTFOperative);
-                rewardName = "获得了中士卡";
-                success = true;
-            }
-            else if (randomValue < 45f && !success) // 10% 再来一次
-            {
-                player.AddItem(ItemType.Coin);
-                rewardName = "又获得了一个硬币";
-                success = true;
-            }
-            else if (randomValue < 55f && !success) // 10% 随机传送
-            {
-                foreach (Player p in Player.ReadyList)
-                {
-                    if (p.IsSCP && p.Role != RoleTypeId.Scp079)
-                    {
-                        player.Position = p.Position + Vector3.right;
-                        player.Rotation = p.Rotation;
-                    }
-                }
-                rewardName = "被传送到SCP旁边";
-                success = true;
-            }
-            else if (randomValue < 75f && !success) // 20% 医疗
-            {
-                bool healthIndex = UnityEngine.Random.Range(0, 2) == 0;
-
-                if (healthIndex)
-                {
-                    player.AddItem(ItemType.SCP500);
-                }
-                else
-                {
-                    player.AddItem(ItemType.Medkit);
-                }
-                rewardName = "获得了医疗物品";
-                success = true;
-            }
-            else // 25% 什么都没有
-            {
-                rewardName = "损失了一个硬币";
-                success = true;
-            }
+            // 执行奖励
+            string result = player.ApplyReward(reward);
 
             // 通知玩家
-            Server.SendBroadcast($"\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {player.Nickname} 通过抛硬币{rewardName}！</color></size></b>", 3);
-
+            Server.SendBroadcast(TranslateConfig.RewardOkBroadcastTemplate.Replace("{nickName}", player.Nickname).Replace("{result}", result), 3);
         }
 
         public override void OnScp914Activating(Scp914ActivatingEventArgs ev)
         {
-            if (HUDInfoConfig.info_914 == false) return;
+            if (HUDInfoConfig.EnableScp914Info == false) return;
 
             Scp914.Scp914KnobSetting knob = ev.KnobSetting;
-            string mode = TranslateConfig.scp914_trans[knob];
+            string mode = TranslateConfig.Scp914ModeTranslations[knob];
 
             var p_operator = ev.Player.Nickname ?? "未知";
 
-            string msg = TranslateConfig.scp914_template.Replace("{mode}", mode)
+            string msg = TranslateConfig.Scp914Template.Replace("{mode}", mode)
                                    .Replace("{p_operator}", p_operator);
 
             foreach (var p in Player.List)
             {
                 if (p.IsAlive && p != null && p.Room.Name == RoomName.Lcz914)// 检测914附近玩家，然后告诉他们914正在运行
                 {
-                    _huds[p].Show914(msg);
+                    PlayerHuds[p].Show914(msg);
                 }
             }
         }
 
         public override void OnPlayerInteractingElevator(PlayerInteractingElevatorEventArgs ev)
         {
-            if (HUDInfoConfig.info_elevator == false) return;
+            if (HUDInfoConfig.EnableElevatorInfo == false) return;
 
             IEnumerable<Player> near = Player.List.Where(p =>
-                Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.elev_range);
+                Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.ElevatorHintRange);
 
             var p_operator = ev.Player.Nickname ?? "未知";
-            string text = TranslateConfig.elev_template.Replace("{p_operator}", p_operator);
+            string text = TranslateConfig.ElevatorTemplate.Replace("{p_operator}", p_operator);
             foreach (var p in near)
             {
-                _huds[p].ShowElevator(text);
+                PlayerHuds[p].ShowElevator(text);
             }
         }
     }

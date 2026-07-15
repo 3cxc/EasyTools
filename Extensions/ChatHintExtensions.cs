@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EasyTools.Utils
+namespace EasyTools.Extensions
 {
 
     public class ChatMessage(Player sender, ChatMessage.MessageType type, string message)
@@ -39,7 +39,7 @@ namespace EasyTools.Utils
         public RoleTypeId SenderRole { get; } = sender.Role;
     }
 
-    public class ChatUtils
+    public static class ChatHintExtensions
     {
         private static CoroutineHandle _coroutine;
 
@@ -117,7 +117,7 @@ namespace EasyTools.Utils
             }
         }
 
-        public static void InitForPlayer(Player player)
+        public static void InitChatHint(this Player player)
         {
             if (!_coroutine.IsRunning)
                 _coroutine = Timing.RunCoroutine(MessageCoroutineMethod());
@@ -138,7 +138,7 @@ namespace EasyTools.Utils
             PlayerDisplay.Get(player.ReferenceHub).AddHint(MessageSlot[player]);
         }
 
-        public static void SendMessage(Player sender, ChatMessage.MessageType type, string message) => SendMessage(new ChatMessage(sender, type, message));
+        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) => SendMessage(new ChatMessage(sender, type, message));
 
         public static void SendMessage(ChatMessage message)
         {

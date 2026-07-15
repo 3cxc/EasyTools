@@ -1,9 +1,9 @@
-﻿using EasyTools.DataBase.Serialization;
+﻿using EasyTools.DataStructures;
 using EasyTools.Events;
 using LiteDB;
 using System.Collections.Generic;
 
-namespace EasyTools.DataBase
+namespace EasyTools.API
 {
     public static class DataAPI
     {
@@ -16,7 +16,7 @@ namespace EasyTools.DataBase
             {
                 return true;
             }
-            using LiteDatabase database = new(CustomEventHandler.DataBaseConfig.database_path);
+            using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
 
             if ((data = database.GetCollection<PlayerData>("Players")?.FindById(id)) != null)
             {
