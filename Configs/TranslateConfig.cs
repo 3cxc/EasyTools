@@ -100,7 +100,9 @@ namespace EasyTools.Configs
         /// <summary>
         /// 
         /// </summary>
+        [Description("使用硬币抽卡时背包空间不足提示")]
         public string RewardFailedBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>";
+        [Description("使用硬币抽卡成功提示")]
         public string RewardOkBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {nickName} 通过抛硬币{result}！</color></size></b>";
     }
 }

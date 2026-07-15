@@ -5,6 +5,12 @@ namespace EasyTools.Configs
 {
     public class CoinConfig
     {
+        [Description("开启硬币抽卡?")]
+        public bool Enable { get; set; } = true;
+
+        [Description("开局发放硬币?")]
+        public bool EnableRoundCoin { get; set; } = true;
+
         [Description("抽卡奖励列表，权重总和为 100（自动归一化也可），支持修改概率和奖励内容")]
         public List<RewardSetting> Rewards { get; set; } = new List<RewardSetting>
         {

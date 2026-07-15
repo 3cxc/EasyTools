@@ -299,7 +299,7 @@ namespace EasyTools.Events
                 });
             }
 
-            if (Config.EnableRoundCoin)
+            if (CoinConfig.EnableRoundCoin)
             {
                 if (Player.Role == RoleTypeId.ClassD || Player.Role == RoleTypeId.FacilityGuard || Player.Role == RoleTypeId.Scientist)
                 {
@@ -449,7 +449,7 @@ namespace EasyTools.Events
 
         public override void OnPlayerFlippingCoin(PlayerFlippingCoinEventArgs ev)
         {
-            if (!ev.IsAllowed || !Config.Coin) return;
+            if (!ev.IsAllowed || !CoinConfig.Enable) return;
 
             if (ev.Player.Items.Count() == 8)
             {
