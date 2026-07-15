@@ -48,6 +48,16 @@ namespace EasyTools.Events
 
         // SCP交换列表
         public static volatile Dictionary<Player, Player> SwapRequests = new Dictionary<Player, Player>();
+
+        // SCP补位列表
+        public static readonly Dictionary<RoleTypeId, ReplacementEntry> Replacements = new();
+
+        public class ReplacementEntry
+        {
+            public List<Player> Applicants = new();
+            public float ExpireTime; // Time.time + 10f
+        }
+
         public override void OnServerWaitingForPlayers()
         {
             base.OnServerWaitingForPlayers();
@@ -187,6 +197,44 @@ namespace EasyTools.Events
             {
                 _huds.Remove(player);
             }
+
+            // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
+            foreach (var entry in Replacements.Values)
+                entry.Applicants.Remove(player);
+
+            if (player.IsSCP && player.Health > 0)
+            {
+                var role = player.Role;
+
+                Replacements[role] = new ReplacementEntry
+                {
+                    ExpireTime = Time.time + 10f
+                };
+
+                Timing.CallDelayed(10f, () => ExecuteReplacement(role));
+            }
+        }
+
+        private void ExecuteReplacement(RoleTypeId role)
+        {
+            if (!Replacements.TryGetValue(role, out var entry))
+                return;
+
+            // 从补位名单中筛选仍在线的人类玩家
+            var valid = entry.Applicants.Where(p => p != null && p.IsHuman).ToList();
+
+            if (valid.Count == 0)
+            {
+                Server.SendBroadcast($"<color=orange>{role} 补位无人申请，该角色空缺。</color>", 5);
+                return;
+            }
+
+            // 随机选择
+            var chosen = valid[UnityEngine.Random.Range(0, valid.Count)];
+            chosen.Role = role;
+
+            Server.SendBroadcast($"<color=green>补位成功！{chosen.Nickname} 成为了 {role}。</color>", 10);
+            Log.Info($"{chosen.Nickname} 补位成为 {role}");
         }
 
         private static volatile bool allow_spawn_scp_3114 = true; //用以确保不会重复生成SCP-3114
