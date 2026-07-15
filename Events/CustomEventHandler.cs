@@ -44,6 +44,10 @@ namespace EasyTools.Events
 
         public static HintData data_914, data_elevator;
 
+        public static DateTime RoundStartTime { get; private set; }
+
+        // SCP交换列表
+        public static volatile Dictionary<Player, Player> SwapRequests = new Dictionary<Player, Player>();
         public override void OnServerWaitingForPlayers()
         {
             base.OnServerWaitingForPlayers();
@@ -59,6 +63,8 @@ namespace EasyTools.Events
 
         public override void OnServerRoundStarted()
         {
+            RoundStartTime = DateTime.Now;
+
             Timing.CallDelayed(10f, () =>
             {
                 if (Config.EnableAutoServerMessage)
