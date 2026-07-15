@@ -23,21 +23,27 @@ namespace EasyTools.Commands.System
 
             if (sender is null || (player = Player.Get(sender)) is null)
             {
-                response = TranslateConfig.RescueCommandError;
+                response = TranslateConfig.CommandFailed;
                 return false;
             }
 
             WaypointBase.GetRelativePosition(player.Position, out byte id, out _);
 
-            if (!player.IsAlive || !CustomEventHandler.Config.KillMeCommand)
+            if (!CustomEventHandler.Config.KillMeCommand)
             {
-                response = TranslateConfig.RescueCommandFailed;
+                response = TranslateConfig.CommandNotEnabled;
+                return false;
+            }
+
+            if (!player.IsAlive)
+            {
+                response = TranslateConfig.CommandNotAllowed;
                 return false;
             }
 
             player.Kill();
 
-            response = TranslateConfig.RescueCommandOk;
+            response = TranslateConfig.CommandOk;
             return true;
         }
     }

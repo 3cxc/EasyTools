@@ -6,8 +6,6 @@ namespace EasyTools.Configs
     {
         [Description("是否启用称号系统")]
         public bool Enable { get; set; } = true;
-        [Description("存储路径")]
-        public string Pach { get; set; } = "/home/shiroko/.config/DIRSave";
         [Description("彩色称号更新频率")]
         public int Each { get; set; } = 1;
     }

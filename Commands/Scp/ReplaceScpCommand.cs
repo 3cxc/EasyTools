@@ -22,7 +22,13 @@ namespace EasyTools.Commands.Scp
 
             if (sender is null || (player = Player.Get(sender)) is null || !(player = Player.Get(sender)).IsSCP)
             {
-                response = "失败，可能指令未启用或者身份不允许等";
+                response = CustomEventHandler.TranslateConfig.CommandNotAllowed;
+                return false;
+            }
+
+            if (CustomEventHandler.Config.EnableSCPReplace)
+            {
+                response = CustomEventHandler.TranslateConfig.CommandNotEnabled;
                 return false;
             }
 
@@ -58,7 +64,8 @@ namespace EasyTools.Commands.Scp
             }
 
             entry.Applicants.Add(player);
-            response = $"你已申请补位 {targetRole}，等待 {10 - (Time.time - (entry.ExpireTime - 10f)):0.0} 秒后系统随机选择。";
+            float remaining = entry.ExpireTime - Time.time;
+            response = $"你已申请补位 {targetRole}，等待 {remaining:0.0} 秒后系统随机选择。";
             return true;
         }
     }

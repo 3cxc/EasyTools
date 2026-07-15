@@ -29,9 +29,7 @@ namespace EasyTools.Events
 
         public static BadgeConfig BadgeConfig;
 
-        public static CustomRoleConfig CustomRoleConfig;
-
-        public static DataBaseConfig DataBaseConfig;
+        public static LevelSystemConfig LevelSystemConfig;
 
         public static HUDInfoConfig HUDInfoConfig;
 
@@ -88,7 +86,7 @@ namespace EasyTools.Events
                 PlayerHuds.Values.ToList().ForEach(h => h.Start());
             });
 
-            if (DataBaseConfig.database_enable)
+            if (Config.EnablePlayTime)
             {
                 Timing.RunCoroutine(DataExtensions.CollectInfo());
             }
@@ -120,19 +118,28 @@ namespace EasyTools.Events
 
             player.InitChatHint();
 
-            if (DataBaseConfig.database_enable)
+            DataExtensions.PlayerList.Add(player);
+            PlayerData data = player.GetData();
+            data.NickName = player.Nickname;
+            data.LastJoinedTime = DateTime.Now;
+            data.UpdateData();
+
+            if (LevelSystemConfig.EnableLevelSystem)
             {
-                DataExtensions.PlayerList.Add(player);
-                PlayerData data = player.GetData();
-                data.NickName = player.Nickname;
-                data.LastJoinedTime = DateTime.Now;
-                data.UpdateData();
                 player.UpdatePlayerNameWithLevelPrefix();
+            }
+
+            if (Config.EnableAdmin)
+            {
                 player.ApplyPermission();
+            }
+
+            if (BadgeConfig.Enable)
+            {
                 player.ApplyBadge();
             }
 
-            if (Config.EnableLogger)
+            if (Config.EnablePlayerLogger)
             {
                 string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
                 string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
@@ -167,13 +174,10 @@ namespace EasyTools.Events
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
 
-            if (DataBaseConfig.database_enable)
-            {
-                DataExtensions.PlayerList.Remove(player);
-                PlayerData data = player.GetData();
-                data.LastJoinedTime = DateTime.Now;
-                data.UpdateData();
-            }
+            DataExtensions.PlayerList.Remove(player);
+            PlayerData data = player.GetData();
+            data.LastJoinedTime = DateTime.Now;
+            data.UpdateData();
 
             if (Config.EnablePlayerLogger)
             {
@@ -197,20 +201,23 @@ namespace EasyTools.Events
                 PlayerHuds.Remove(player);
             }
 
-            // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
-            foreach (var entry in Replacements.Values)
-                entry.Applicants.Remove(player);
-
-            if (player.IsSCP && player.Health > 0)
+            if (Config.EnableSCPReplace)
             {
-                var role = player.Role;
+                // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
+                foreach (var entry in Replacements.Values)
+                    entry.Applicants.Remove(player);
 
-                Replacements[role] = new ReplacementEntry
+                if (player.IsSCP && player.Health > 0)
                 {
-                    ExpireTime = Time.time + 10f
-                };
+                    var role = player.Role;
 
-                Timing.CallDelayed(10f, () => ExecuteReplacement(role));
+                    Replacements[role] = new ReplacementEntry
+                    {
+                        ExpireTime = Time.time + Config.SCPReplaceTime
+                    };
+
+                    Timing.CallDelayed(Config.SCPReplaceTime, () => ExecuteReplacement(role));
+                }
             }
         }
 
@@ -236,28 +243,21 @@ namespace EasyTools.Events
             Log.Info($"{chosen.Nickname} 补位成为 {role}");
         }
 
-        private static volatile bool allow_spawn_scp_3114 = true; //用以确保不会重复生成SCP-3114
+        private static volatile bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114
 
         public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
         {
-            if (CustomRoleConfig.spawn_scp_3114 && allow_spawn_scp_3114)
+            if (Config.EnableSCP3114 && AllowSpawnScp3114)
             {
-                if (Player.ReadyList.Count() >= CustomRoleConfig.spawn_scp_3114_limit)
+                if (Player.ReadyList.Count() >= Config.SCP3114Limit && UnityEngine.Random.value < Config.SCP3114Weight)
                 {
-                    foreach (Player p in Player.ReadyList)
+                    AllowSpawnScp3114 = false;
+                    Timing.CallDelayed(0.5f, () =>
                     {
-                        if ((UnityEngine.Random.Range(0, 10) == 3))
-                        {
-                            Timing.CallDelayed(0.5f, () =>
-                            {
-                                ev.Player.Role = RoleTypeId.Scp3114;
-                                ev.IsAllowed = true;
-                                allow_spawn_scp_3114 = false;
-                            });
-                        }
-                    }
+                        ev.Player.Role = RoleTypeId.Scp3114;
+                        ev.IsAllowed = true;
+                    });
                 }
-                allow_spawn_scp_3114 = false;
             }
         }
 
@@ -313,34 +313,38 @@ namespace EasyTools.Events
 
         public override void OnPlayerDying(PlayerDyingEventArgs ev)
         {
+            if (!LevelSystemConfig.EnableLevelSystem) return;
+
             // 避免处理非玩家击杀或无效情况
-            //if (ev.Attacker == null || ev.Player == null)
-            //    return;
+            if (ev.Attacker == null || ev.Player == null)
+                return;
+
+            if (ev.Player.IsDummy && !LevelSystemConfig.CountBot) return;
 
             // 给击杀者添加经验
             PlayerData data = ev.Attacker.GetData();
 
             if (ev.Attacker.IsSCP)
             {
-                data.PlayerXp += 5.0;
+                data.PlayerXp += LevelSystemConfig.SCPKillHumanXp;
             }
             else if (ev.Player.IsSCP)
             {
                 if (ev.Player.Role == RoleTypeId.Scp0492)
                 {
-                    data.PlayerXp += 30.0;
+                    data.PlayerXp += LevelSystemConfig.HumanKillSCP0492Xp;
                 }
                 else
                 {
-                    data.PlayerXp += 50.0;
+                    data.PlayerXp += LevelSystemConfig.HumanKillSCPXp;
                 }
             }
             else
             {
-                data.PlayerXp += 5.0;
+                data.PlayerXp += LevelSystemConfig.HumanKillHumanXp;
             }
 
-            data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, 1);
+            data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
             ev.Attacker.UpdatePlayerNameWithLevelPrefix();
         }
 
@@ -392,14 +396,17 @@ namespace EasyTools.Events
                 }
             }
 
-            PlayerData data = ev.Player.GetData();
-            data.PlayerXp += 20.0;
+            if (LevelSystemConfig.EnableLevelSystem)
+            {
+                PlayerData data = ev.Player.GetData();
+                data.PlayerXp += LevelSystemConfig.HumanEscapeXp;
 
-            data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, 1);
-            ev.Player.UpdatePlayerNameWithLevelPrefix();
+                data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
+                ev.Player.UpdatePlayerNameWithLevelPrefix();
 
-            // 通知玩家
-            ev.Player.SendBroadcast("\n<b><size=25><color=#00CC00>逃脱成功，获得20经验值</color></size></b>", 3);
+                // 通知玩家
+                ev.Player.SendBroadcast("\n<b><size=25><color=#00CC00>逃脱成功，获得20经验值</color></size></b>", 3);
+            }
         }
 
         public override void OnPlayerInteractingScp330(PlayerInteractingScp330EventArgs ev)
@@ -421,7 +428,7 @@ namespace EasyTools.Events
 
             Player player = Player.Get(sender);
 
-            if (player != null && !string.IsNullOrEmpty(command) && Config.EnableLogger)
+            if (player != null && !string.IsNullOrEmpty(command) && Config.EnableAdminLogger)
             {
                 if (!player.RemoteAdminAccess) return;
 

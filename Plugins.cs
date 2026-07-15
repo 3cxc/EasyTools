@@ -5,7 +5,6 @@ using LabApi.Events.CustomHandlers;
 using LabApi.Features;
 using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
-using System.IO;
 
 namespace EasyTools
 {
@@ -19,8 +18,7 @@ namespace EasyTools
             CustomEventHandler.Config = this.LoadConfig<Config>("config.yml");
             CustomEventHandler.TranslateConfig = this.LoadConfig<TranslateConfig>("translateConfig.yml");
             CustomEventHandler.BadgeConfig = this.LoadConfig<BadgeConfig>("badgeConfig.yml");
-            CustomEventHandler.CustomRoleConfig = this.LoadConfig<CustomRoleConfig>("customRoleConfig.yml");
-            CustomEventHandler.DataBaseConfig = this.LoadConfig<DataBaseConfig>("dataBaseConfig.yml");
+            CustomEventHandler.LevelSystemConfig = this.LoadConfig<LevelSystemConfig>("dataBaseConfig.yml");
             CustomEventHandler.HUDInfoConfig = this.LoadConfig<HUDInfoConfig>("HUDInfoConfig.yml");
             CustomEventHandler.CoinConfig = this.LoadConfig<CoinConfig>("coinConfig.yml");
 
@@ -37,11 +35,6 @@ namespace EasyTools
                 CustomEventHandler.HUDInfoConfig.ElevatorDisplayY,
                 CustomEventHandler.HUDInfoConfig.ElevatorFontSize
             );
-
-            if (!Directory.Exists(CustomEventHandler.BadgeConfig.Pach))
-            {
-                Directory.CreateDirectory(CustomEventHandler.BadgeConfig.Pach);
-            }
         }
 
 
@@ -55,7 +48,7 @@ namespace EasyTools
 
         public override string Author => "3cxc";
 
-        public override System.Version Version => new(1, 0, 1);
+        public override System.Version Version => new(1, 1, 0);
 
         public override System.Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 

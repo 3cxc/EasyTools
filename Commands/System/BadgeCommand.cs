@@ -22,7 +22,7 @@ namespace EasyTools.Commands.System
 
             if (sender is null || (player = Player.Get(sender)) is null)
             {
-                response = CustomEventHandler.TranslateConfig.RescueCommandError;
+                response = CustomEventHandler.TranslateConfig.CommandFailed;
                 return false;
             }
 
@@ -30,7 +30,7 @@ namespace EasyTools.Commands.System
 
             if (data.PermissionLevel == PermissionLevel.Player)
             {
-                response = CustomEventHandler.TranslateConfig.RescueCommandFailed;
+                response = CustomEventHandler.TranslateConfig.CommandNotAllowed;
                 return false;
             }
 
@@ -73,7 +73,8 @@ namespace EasyTools.Commands.System
                         targetData.Badge = $"{arguments.At(1)}(Lv{(int)PermissionLevel.Moderator}.MODERATOR)";
                         break;
                 }
-            } else targetData.Badge = arguments.At(1);
+            }
+            else targetData.Badge = arguments.At(1);
 
             // 无颜色参数时默认为 rainbow
             string color = arguments.Count >= 3 ? arguments.At(2) : "rainbow";

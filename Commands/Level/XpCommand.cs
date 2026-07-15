@@ -24,20 +24,20 @@ namespace EasyTools.Commands.Level
 
             if (sender is null || (player = Player.Get(sender)) is null)
             {
-                response = TranslateConfig.RescueCommandError;
+                response = TranslateConfig.CommandFailed;
                 return false;
             }
 
-            if (!CustomEventHandler.DataBaseConfig.database_enable)
+            if (!CustomEventHandler.LevelSystemConfig.EnableLevelSystem)
             {
-                response = TranslateConfig.LevelCommandFailed;
+                response = CustomEventHandler.TranslateConfig.CommandNotEnabled;
                 return false;
             }
 
             PlayerData data = player.GetData();
             double xp = data.PlayerXp;
-            int level = LevelExtensions.GetLevelFromXp(xp, 1);
-            double needXp = LevelExtensions.GetXpUntilNextLevel(xp, 1);
+            int level = LevelExtensions.GetLevelFromXp(xp, CustomEventHandler.LevelSystemConfig.XpScaleFactor);
+            double needXp = LevelExtensions.GetXpUntilNextLevel(xp, CustomEventHandler.LevelSystemConfig.XpScaleFactor);
 
             response = $"你的等级: {level} | 当前经验: {xp} | 升级还需: {needXp} XP";
             return true;

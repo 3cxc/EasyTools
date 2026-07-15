@@ -24,7 +24,7 @@ namespace EasyTools.Commands.Chat
 
             if (sender is null || (player = Player.Get(sender)) is null)
             {
-                response = TranslateConfig.ChatCommandError;
+                response = TranslateConfig.CommandNotAllowed;
                 return false;
             }
 
@@ -37,7 +37,7 @@ namespace EasyTools.Commands.Chat
             player.SendHintMessage(ChatMessage.MessageType.BroadcastChat, $"<noparse>{string.Join(" ", arguments)}</noparse>");
 
             Log.Info(player.Nickname + " 发送了 " + arguments.At(0));
-            response = TranslateConfig.RescueCommandOk;
+            response = TranslateConfig.ChatCommandOk;
             return true;
         }
     }

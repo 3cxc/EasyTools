@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using EasyTools.DataStructures;
+using EasyTools.Events;
 using EasyTools.Extensions;
 using LabApi.Features.Wrappers;
 using System;
@@ -17,6 +18,12 @@ namespace EasyTools.Commands.System
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
+            if (!CustomEventHandler.Config.EnableAdmin)
+            {
+                response = CustomEventHandler.TranslateConfig.CommandNotEnabled;
+                return false;
+            }
+
             if (arguments.Count == 0)
             {
                 response = "请输入要给予权限的 SteamId";
@@ -37,7 +44,7 @@ namespace EasyTools.Commands.System
                 return false;
             }
 
-            if(!Enum.TryParse(arguments.At(1), true, out PermissionLevel level))
+            if (!Enum.TryParse(arguments.At(1), true, out PermissionLevel level))
             {
                 response = "权限组无效，请输入 (moderator|admin|owner)";
                 return false;

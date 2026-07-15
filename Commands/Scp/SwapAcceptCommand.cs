@@ -21,20 +21,26 @@ namespace EasyTools.Commands.Scp
 
             if (sender is null || (player = Player.Get(sender)) is null || !(player = Player.Get(sender)).IsSCP)
             {
-                response = "失败，可能指令未启用或者身份不允许等";
+                response = CustomEventHandler.TranslateConfig.CommandNotAllowed;
                 return false;
             }
 
-            if ((DateTime.Now - CustomEventHandler.RoundStartTime).TotalSeconds > 300)
+            if (CustomEventHandler.Config.EnableSCPStartExchange)
             {
-                response = "失败，交换指令只能在开局三分钟内使用";
+                response = CustomEventHandler.TranslateConfig.CommandNotEnabled;
+                return false;
+            }
+
+            if ((DateTime.Now - CustomEventHandler.RoundStartTime).TotalSeconds > CustomEventHandler.Config.SCPStartExchangeTime)
+            {
+                response = CustomEventHandler.TranslateConfig.SwapCommandTimeLimitBroadcastTemplate;
                 return false;
             }
 
             // 检查是否有发给自己的请求
             if (!CustomEventHandler.SwapRequests.TryGetValue(player, out Player requester))
             {
-                response = "没有待处理的交换请求";
+                response = CustomEventHandler.TranslateConfig.SwapCommandNoRequestBroadcastTemplate;
                 return false;
             }
 

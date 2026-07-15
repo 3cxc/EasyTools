@@ -16,7 +16,7 @@ namespace EasyTools.API
             {
                 return true;
             }
-            using LiteDatabase database = new(CustomEventHandler.DataBaseConfig.database_path);
+            using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
 
             if ((data = database.GetCollection<PlayerData>("Players")?.FindById(id)) != null)
             {

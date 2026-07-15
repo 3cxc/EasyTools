@@ -109,7 +109,11 @@ namespace EasyTools.Extensions
                 };
 
                 Server.RunCommand($"/setgroup {player.PlayerId} {group}");
-                Log.Info($"[AC] Date: {DateTime.Now} | Player: {player.Nickname} | Perm: {group} | Steam64ID: {player.UserId}");
+
+                if (CustomEventHandler.Config.EnableAdminLogger)
+                {
+                    Log.Info($"[AC] Date: {DateTime.Now} | Player: {player.Nickname} | Perm: {group} | Steam64ID: {player.UserId}");
+                }
             }
         }
     }

@@ -24,7 +24,7 @@ namespace EasyTools.Commands.Chat
 
             if (sender is null || (player = Player.Get(sender)) is null)
             {
-                response = TranslateConfig.ChatCommandError;
+                response = TranslateConfig.CommandNotAllowed;
                 return false;
             }
 

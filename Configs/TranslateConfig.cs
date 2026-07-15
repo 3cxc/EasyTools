@@ -8,17 +8,17 @@ namespace EasyTools.Configs
 {
     public class TranslateConfig
     {
-        [Description("自救指令_错误")]
-        public string RescueCommandError { get; set; } = "执行指令时发生错误，请稍后再试";
-        [Description("自救指令_失败")]
-        public string RescueCommandFailed { get; set; } = "失败，可能指令未启用或者身份不允许等";
-        [Description("自救指令_成功")]
-        public string RescueCommandOk { get; set; } = "成功";
-        [Description("聊天指令_错误")]
-        public string ChatCommandError { get; set; } = "发送消息时出现错误，请稍后重试";
-        [Description("聊天指令_失败")]
+        [Description("命令未启用时的提示")]
+        public string CommandNotEnabled { get; set; } = "该命令未启用";
+        [Description("当前身份不允许执行命令时的提示")]
+        public string CommandNotAllowed { get; set; } = "当前身份不允许执行该命令";
+        [Description("命令执行失败时的提示")]
+        public string CommandFailed { get; set; } = "执行失败，可能是参数错误等";
+        [Description("命令执行成功时的提示")]
+        public string CommandOk { get; set; } = "执行成功";
+        [Description("聊天信息发送失败时提示")]
         public string ChatCommandFailed { get; set; } = "发送失败，你被禁言或者信息为空或者聊天系统未启用";
-        [Description("聊天指令_成功")]
+        [Description("聊天信息发送成功时提示")]
         public string ChatCommandOk { get; set; } = "发送成功";
         /// <summary>
         /// 
@@ -95,8 +95,6 @@ namespace EasyTools.Configs
         /// </summary>
         [Description("等级系统_查询失败")]
         public string LevelCommandFailed { get; set; } = "查询失败，等级系统未启用";
-        [Description("等级系统_查询成功")]
-        public string LevelCommandOk { get; set; } = "您当前的经验值为: ";
         /// <summary>
         /// 
         /// </summary>
@@ -104,5 +102,12 @@ namespace EasyTools.Configs
         public string RewardFailedBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>你的背包空间不足，无法继续抽卡！</color></size></b>";
         [Description("使用硬币抽卡成功提示")]
         public string RewardOkBroadcastTemplate { get; set; } = "\n<b><size=25><color=#00CC00>🎉 恭喜！玩家 {nickName} 通过抛硬币{result}！</color></size></b>";
+        /// <summary>
+        /// 
+        /// </summary>
+        [Description("开局三分钟后使用交换指令的禁止提示")]
+        public string SwapCommandTimeLimitBroadcastTemplate { get; set; } = "交换指令只能在开局三分钟内使用";
+        [Description("没有待处理交换请求时提示")]
+        public string SwapCommandNoRequestBroadcastTemplate { get; set; } = "没有待处理的交换请求";
     }
 }
