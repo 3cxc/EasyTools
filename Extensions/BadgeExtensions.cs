@@ -59,7 +59,7 @@ namespace EasyTools.Extensions
                 {
                     item.GroupColor = FMoreColo.RandomItem();
                 }
-                yield return Timing.WaitForSeconds(CustomEventHandler.BadgeConfig.each);
+                yield return Timing.WaitForSeconds(CustomEventHandler.BadgeConfig.Each);
             }
         }
 

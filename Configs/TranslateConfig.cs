@@ -78,11 +78,11 @@ namespace EasyTools.Configs
         /// 
         /// </summary>
         [Description("电梯显示模板(HEX color写死, {p_operator}表示操作人, 没有的话自动为未知):")]
-        public string elev_template { get; set; } = "[Elevator] 电梯使用者: <color=#B952FA>{p_operator}</color>";
-        [Description("SCP914显示模板(HEX color写死, {mode}表示操作模式, {p_operator}表示操作人, 没有的话自动为未知):")]
-        public string scp914_template { get; set; } = "[Scp914] 已启动! 模式: <color=#F7C73E>{mode}</color>, 操作人: <color=#0080FF>{p_operator}</color>";
-        [Description("SCP914, Rough模式翻译:")]
-        public Dictionary<Scp914KnobSetting, string> scp914_trans { get; set; } = new Dictionary<Scp914KnobSetting, string>()
+        public string ElevatorTemplate { get; set; } = "[Elevator] 电梯使用者: <color=#B952FA>{p_operator}</color>";
+        [Description("SCP-914 显示模板(HEX color写死, {mode}表示操作模式, {p_operator}表示操作人, 没有的话自动为未知):")]
+        public string Scp914Template { get; set; } = "[Scp914] 已启动! 模式: <color=#F7C73E>{mode}</color>, 操作人: <color=#0080FF>{p_operator}</color>";
+        [Description("SCP-914 模式翻译:")]
+        public Dictionary<Scp914KnobSetting, string> Scp914ModeTranslations { get; set; } = new Dictionary<Scp914KnobSetting, string>()
         {
             { Scp914KnobSetting.Rough, "粗加" },
             { Scp914KnobSetting.Coarse, "半粗" },

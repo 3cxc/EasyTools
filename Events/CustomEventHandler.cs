@@ -37,11 +37,11 @@ namespace EasyTools.Events
 
         public static CoinConfig CoinConfig;
 
-        public static CoroutineHandle Badge_Coroutine;
+        public static CoroutineHandle BadgeCoroutine;
 
-        public static readonly Dictionary<Player, PlayerHint> _huds = new();
+        public static readonly Dictionary<Player, PlayerHint> PlayerHuds = new();
 
-        public static HintData data_914, data_elevator;
+        public static HintData Scp914HintData, ElevatorHintData;
 
         public static DateTime RoundStartTime { get; private set; }
 
@@ -64,7 +64,7 @@ namespace EasyTools.Events
             if (BadgeConfig.Enable)
             {
                 BadgeExtensions.rainbw.Clear();
-                Badge_Coroutine = Timing.RunCoroutine(BadgeExtensions.Rainbw());
+                BadgeCoroutine = Timing.RunCoroutine(BadgeExtensions.Rainbw());
             }
 
             Server.FriendlyFire = false;
@@ -85,7 +85,7 @@ namespace EasyTools.Events
                 {
                     Timing.RunCoroutine(ScpAutoHealHelper.AutoReal());
                 }
-                _huds.Values.ToList().ForEach(h => h.Start());
+                PlayerHuds.Values.ToList().ForEach(h => h.Start());
             });
 
             if (DataBaseConfig.database_enable)
@@ -100,7 +100,7 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                Timing.KillCoroutines(Badge_Coroutine);
+                Timing.KillCoroutines(BadgeCoroutine);
             }
 
             if (Config.EnableFriendFire)
@@ -155,7 +155,7 @@ namespace EasyTools.Events
                 }
             }
 
-            _huds[player] = new PlayerHint(player, data_914, data_elevator);
+            PlayerHuds[player] = new PlayerHint(player, Scp914HintData, ElevatorHintData);
 
         }
 
@@ -175,7 +175,7 @@ namespace EasyTools.Events
                 data.UpdateData();
             }
 
-            if (Config.EnableLogger)
+            if (Config.EnablePlayerLogger)
             {
                 string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {nickName} | Steam64ID: {userId}";
                 string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
@@ -192,9 +192,9 @@ namespace EasyTools.Events
                 }
             }
 
-            if (_huds.ContainsKey(player))
+            if (PlayerHuds.ContainsKey(player))
             {
-                _huds.Remove(player);
+                PlayerHuds.Remove(player);
             }
 
             // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
@@ -475,37 +475,37 @@ namespace EasyTools.Events
 
         public override void OnScp914Activating(Scp914ActivatingEventArgs ev)
         {
-            if (HUDInfoConfig.info_914 == false) return;
+            if (HUDInfoConfig.EnableScp914Info == false) return;
 
             Scp914.Scp914KnobSetting knob = ev.KnobSetting;
-            string mode = TranslateConfig.scp914_trans[knob];
+            string mode = TranslateConfig.Scp914ModeTranslations[knob];
 
             var p_operator = ev.Player.Nickname ?? "未知";
 
-            string msg = TranslateConfig.scp914_template.Replace("{mode}", mode)
+            string msg = TranslateConfig.Scp914Template.Replace("{mode}", mode)
                                    .Replace("{p_operator}", p_operator);
 
             foreach (var p in Player.List)
             {
                 if (p.IsAlive && p != null && p.Room.Name == RoomName.Lcz914)// 检测914附近玩家，然后告诉他们914正在运行
                 {
-                    _huds[p].Show914(msg);
+                    PlayerHuds[p].Show914(msg);
                 }
             }
         }
 
         public override void OnPlayerInteractingElevator(PlayerInteractingElevatorEventArgs ev)
         {
-            if (HUDInfoConfig.info_elevator == false) return;
+            if (HUDInfoConfig.EnableElevatorInfo == false) return;
 
             IEnumerable<Player> near = Player.List.Where(p =>
-                Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.elev_range);
+                Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.ElevatorHintRange);
 
             var p_operator = ev.Player.Nickname ?? "未知";
-            string text = TranslateConfig.elev_template.Replace("{p_operator}", p_operator);
+            string text = TranslateConfig.ElevatorTemplate.Replace("{p_operator}", p_operator);
             foreach (var p in near)
             {
-                _huds[p].ShowElevator(text);
+                PlayerHuds[p].ShowElevator(text);
             }
         }
     }

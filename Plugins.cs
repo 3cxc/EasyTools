@@ -24,18 +24,18 @@ namespace EasyTools
             CustomEventHandler.HUDInfoConfig = this.LoadConfig<HUDInfoConfig>("HUDInfoConfig.yml");
             CustomEventHandler.CoinConfig = this.LoadConfig<CoinConfig>("coinConfig.yml");
 
-            CustomEventHandler.data_914 = new HintData
+            CustomEventHandler.Scp914HintData = new HintData
             (
-                CustomEventHandler.HUDInfoConfig._914_x,
-                CustomEventHandler.HUDInfoConfig._914_y,
-                CustomEventHandler.HUDInfoConfig._914_font
+                CustomEventHandler.HUDInfoConfig.Scp914DisplayX,
+                CustomEventHandler.HUDInfoConfig.Scp914DisplayY,
+                CustomEventHandler.HUDInfoConfig.Scp914FontSize
             );
 
-            CustomEventHandler.data_elevator = new HintData
+            CustomEventHandler.ElevatorHintData = new HintData
             (
-                CustomEventHandler.HUDInfoConfig._elev_x,
-                CustomEventHandler.HUDInfoConfig._elev_y,
-                CustomEventHandler.HUDInfoConfig._elev_font
+                CustomEventHandler.HUDInfoConfig.ElevatorDisplayX,
+                CustomEventHandler.HUDInfoConfig.ElevatorDisplayY,
+                CustomEventHandler.HUDInfoConfig.ElevatorFontSize
             );
 
             if (!Directory.Exists(CustomEventHandler.BadgeConfig.Pach))
@@ -72,8 +72,8 @@ namespace EasyTools
 
             Instance = null;
 
-            foreach (var hud in CustomEventHandler._huds.Values) hud.Dispose();
-            CustomEventHandler._huds.Clear();
+            foreach (var hud in CustomEventHandler.PlayerHuds.Values) hud.Dispose();
+            CustomEventHandler.PlayerHuds.Clear();
         }
 
     }

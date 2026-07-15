@@ -25,7 +25,7 @@ namespace EasyTools.Configs
 
         // ---- 15% 随机枪械（两种枪各7.5%） ----
         new RewardSetting { Weight = 7.5f, Type = RewardType.GiveItem, Param = "GunE11SR", Name = "狗官枪" },
-        new RewardSetting { Weight = 7.5f, Type = RewardType.GiveItem, Param = "GunAK", Name = "大机枪" },
+        new RewardSetting { Weight = 7.5f, Type = RewardType.GiveItem, Param = "GunAK", Name = "AK-47" },
 
         // ---- 10% 中士卡 ----
         new RewardSetting { Weight = 10.0f, Type = RewardType.GiveItem, Param = "KeycardMTFOperative", Name = "中士卡" },
@@ -47,7 +47,7 @@ namespace EasyTools.Configs
 
     public class RewardSetting
     {
-        [Description("显示名称(用于广播)")]
+        [Description("显示名称")]
         public string Name { get; set; } = "未知奖励";
 
         [Description("相对权重")]
@@ -56,7 +56,7 @@ namespace EasyTools.Configs
         [Description("奖励类型")]
         public RewardType Type { get; set; } = RewardType.None;
 
-        [Description("参数（根据类型不同：角色ID、物品ID、枪械列表等）")]
+        [Description("额外参数")]
         public string Param { get; set; } = string.Empty;
     }
 
