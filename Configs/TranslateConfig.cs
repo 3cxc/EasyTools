@@ -1,4 +1,4 @@
-﻿using EasyTools.Utils;
+﻿using EasyTools.Extensions;
 using PlayerRoles;
 using Scp914;
 using System.Collections.Generic;

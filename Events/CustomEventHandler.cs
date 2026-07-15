@@ -3,7 +3,6 @@
 using EasyTools.DataStructures;
 using EasyTools.Extensions;
 using EasyTools.Helper;
-using EasyTools.Utils;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp914Events;
@@ -104,7 +103,7 @@ namespace EasyTools.Events
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
 
-            ChatUtils.InitForPlayer(player);
+            player.InitChatHint();
 
             if (DataBaseConfig.database_enable)
             {
