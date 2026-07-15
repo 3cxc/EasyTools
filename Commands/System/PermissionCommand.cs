@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using EasyTools.API;
 using EasyTools.DataStructures;
 using EasyTools.Events;
 using EasyTools.Extensions;
@@ -30,9 +31,7 @@ namespace EasyTools.Commands.System
                 return false;
             }
 
-            Player player = Player.Get(arguments.At(0));
-
-            if (player == null)
+            if (!DataAPI.TryGetData(arguments.At(0), out PlayerData data))
             {
                 response = "无法查找到玩家";
                 return false;
@@ -50,7 +49,6 @@ namespace EasyTools.Commands.System
                 return false;
             }
 
-            PlayerData data = player.GetData();
             data.PermissionLevel = level;
             data.Badge = level switch
             {
@@ -61,8 +59,6 @@ namespace EasyTools.Commands.System
             };
             data.BadgeColor = "rainbow";
             data.UpdateData();
-            player.ApplyPermission();
-            player.ApplyBadge();
 
             response = $"设置成功";
             return true;

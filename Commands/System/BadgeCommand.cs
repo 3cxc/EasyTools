@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using EasyTools.API;
 using EasyTools.DataStructures;
 using EasyTools.Events;
 using EasyTools.Extensions;
@@ -40,15 +41,11 @@ namespace EasyTools.Commands.System
                 return false;
             }
 
-            Player target = Player.Get(arguments.At(0));
-
-            if (target == null)
+            if (!DataAPI.TryGetData(arguments.At(0), out PlayerData targetData))
             {
                 response = "无法查找到玩家";
                 return false;
             }
-
-            PlayerData targetData = target.GetData();
 
             if (arguments.Count < 2)
             {
@@ -81,7 +78,6 @@ namespace EasyTools.Commands.System
             targetData.BadgeColor = color;
 
             targetData.UpdateData();
-            target.ApplyBadge();
 
             string colorDisplay = color == "rainbow" ? "彩虹色" : color;
             response = $"已将 {arguments.At(0)} 的称号设置为 {targetData.Badge}，颜色为 {colorDisplay}";
