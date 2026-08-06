@@ -25,7 +25,7 @@ namespace EasyTools.Commands.Scp
                 return false;
             }
 
-            if (CustomEventHandler.Config.EnableSCPStartExchange)
+            if (!CustomEventHandler.Config.EnableSCPStartExchange)
             {
                 response = CustomEventHandler.TranslateConfig.CommandNotEnabled;
                 return false;
