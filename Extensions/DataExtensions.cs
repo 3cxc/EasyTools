@@ -6,6 +6,7 @@ using LiteDB;
 using MEC;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace EasyTools.Extensions
 {
@@ -58,6 +59,39 @@ namespace EasyTools.Extensions
                 toInsert = new PlayerData()
                 {
                     ID = ply.authManager.UserId,
+                    NickName = "",
+                    LastJoinedTime = DateTime.Now,
+                    LastLeftTime = DateTime.Now,
+                    PlayedTimes = 0,
+                    PlayerKills = 0,
+                    PlayerDeath = 0,
+                    PlayerSCPKills = 0,
+                    PlayerDamage = 0,
+                    RolePlayed = 0,
+                    PlayerShot = 0,
+                };
+                using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
+                database.GetCollection<PlayerData>("Players").Insert(toInsert);
+            }
+
+            if (data is null)
+                return toInsert;
+            return data;
+        }
+
+        public static PlayerData GetData(string userId)
+        {
+            PlayerData toInsert = null;
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentNullException(nameof(userId));
+            // 验证 Steam ID 格式：纯数字+@steam
+            if (!Regex.IsMatch(userId, @"^\d+@steam$", RegexOptions.IgnoreCase))
+                throw new FormatException("无效的 Steam ID 格式，应为 数字@steam");
+            if (!DataAPI.TryGetData(userId, out PlayerData data))
+            {
+                toInsert = new PlayerData()
+                {
+                    ID = userId,
                     NickName = "",
                     LastJoinedTime = DateTime.Now,
                     LastLeftTime = DateTime.Now,
