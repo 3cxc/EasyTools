@@ -3,7 +3,6 @@ using EasyTools.API;
 using EasyTools.DataStructures;
 using EasyTools.Events;
 using EasyTools.Extensions;
-using LabApi.Features.Wrappers;
 using System;
 
 namespace EasyTools.Commands.System
@@ -33,7 +32,8 @@ namespace EasyTools.Commands.System
 
             if (!DataAPI.TryGetData(arguments.At(0), out PlayerData data))
             {
-                response = "无法查找到玩家";
+                DataExtensions.GetData(arguments.At(0));
+                response = "无法查找到玩家，已自动创建，请重新执行一次";
                 return false;
             }
 

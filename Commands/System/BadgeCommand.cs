@@ -43,7 +43,8 @@ namespace EasyTools.Commands.System
 
             if (!DataAPI.TryGetData(arguments.At(0), out PlayerData targetData))
             {
-                response = "无法查找到玩家";
+                DataExtensions.GetData(arguments.At(0));
+                response = "无法查找到玩家，已自动创建，请重新执行一次";
                 return false;
             }
 
