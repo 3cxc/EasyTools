@@ -207,7 +207,7 @@ namespace EasyTools.Events
                 foreach (var entry in Replacements.Values)
                     entry.Applicants.Remove(player);
 
-                if (player.IsSCP && player.Health > 0)
+                if (player.IsSCP)
                 {
                     var role = player.Role;
 
@@ -215,6 +215,8 @@ namespace EasyTools.Events
                     {
                         ExpireTime = Time.time + Config.SCPReplaceTime
                     };
+
+                    Server.SendBroadcast($"\n<b><size=25><color=#00CC00>{player.Role} 掉线，输入 .replace 以补位！</color></size></b>", 3);
 
                     Timing.CallDelayed(Config.SCPReplaceTime, () => ExecuteReplacement(role));
                 }

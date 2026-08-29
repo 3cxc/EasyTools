@@ -20,13 +20,13 @@ namespace EasyTools.Commands.Scp
         {
             Player player;
 
-            if (sender is null || (player = Player.Get(sender)) is null || !(player = Player.Get(sender)).IsSCP)
+            if (sender is null || (player = Player.Get(sender)) is null || (player = Player.Get(sender)).IsSCP)
             {
                 response = CustomEventHandler.TranslateConfig.CommandNotAllowed;
                 return false;
             }
 
-            if (CustomEventHandler.Config.EnableSCPReplace)
+            if (!CustomEventHandler.Config.EnableSCPReplace)
             {
                 response = CustomEventHandler.TranslateConfig.CommandNotEnabled;
                 return false;
@@ -35,12 +35,6 @@ namespace EasyTools.Commands.Scp
             if (arguments.Count == 0)
             {
                 response = "请指定要补位的 SCP 编号(Scp079|Scp096|Scp106|Scp173|Scp049|Scp3114)";
-                return false;
-            }
-
-            if (arguments.Count == 0)
-            {
-                response = "失败，未指定你要交换的目标(Scp079|Scp096|Scp106|Scp173|Scp049|Scp3114)";
                 return false;
             }
 
