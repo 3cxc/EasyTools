@@ -68,6 +68,7 @@ namespace EasyTools.Events
         {
             RoundStartTime = DateTime.Now;
             AllowSpawnScp3114 = true;
+            Replacements.Clear();
 
             Timing.CallDelayed(10f, () =>
             {
