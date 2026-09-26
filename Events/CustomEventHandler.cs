@@ -154,6 +154,8 @@ namespace EasyTools.Events
             string nickName = player.Nickname;
             string userId = player.UserId;
 
+            player.DisposeChatHint();
+
             PlayerData data = player.GetData();
             data.LastLeftTime = DateTime.Now;
             data.UpdateData();

@@ -145,11 +145,15 @@ namespace EasyTools.Extensions
             PlayerDisplay.Get(player.ReferenceHub).AddHint(MessageSlot[player]);
         }
 
-        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) => SendMessage(new ChatMessage(sender, type, message));
+        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) => MessageList.AddFirst(new ChatMessage(sender, type, message));
 
-        public static void SendMessage(ChatMessage message)
+        public static void DisposeChatHint(this Player player)
         {
-            MessageList.AddFirst(message);
+            if (player is null) return;
+            if (!MessageSlot.TryGetValue(player, out var hint)) return;
+
+            MessageSlot.Remove(player);
+            PlayerDisplay.Get(player.ReferenceHub)?.RemoveHint(hint);
         }
     }
 }
