@@ -1,6 +1,7 @@
 ﻿using EasyTools.Configs;
 using EasyTools.DataStructures;
 using EasyTools.Extensions;
+using EasyTools.GamePlays;
 using EasyTools.Helper;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
@@ -36,22 +37,18 @@ namespace EasyTools.Events
         public static CoinConfig CoinConfig;
 
         public static CoroutineHandle BadgeCoroutine;
-
-        public static readonly Dictionary<Player, PlayerHint> PlayerHuds = new();
+        public static PlayerManager PlayerManager { get; } = new();
 
         public static HintData Scp914HintData, ElevatorHintData;
 
         public static DateTime RoundStartTime { get; private set; }
-
-        // SCP交换列表
-        public static volatile Dictionary<Player, Player> SwapRequests = new Dictionary<Player, Player>();
 
         // SCP补位列表
         public static readonly Dictionary<RoleTypeId, ReplacementEntry> Replacements = new();
 
         public class ReplacementEntry
         {
-            public List<Player> Applicants = new();
+            public List<PlayerInfo> Applicants = new();
             public float ExpireTime; // Time.time + 10f
         }
 
@@ -61,7 +58,6 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                BadgeExtensions.rainbw.Clear();
                 BadgeCoroutine = Timing.RunCoroutine(BadgeExtensions.Rainbw());
             }
 
@@ -117,7 +113,6 @@ namespace EasyTools.Events
 
             player.InitChatHint();
 
-            DataExtensions.PlayerList.Add(player);
             PlayerData data = player.GetData();
             data.NickName = player.Nickname;
             data.LastJoinedTime = DateTime.Now;
@@ -161,19 +156,19 @@ namespace EasyTools.Events
                 }
             }
 
-            PlayerHuds[player] = new PlayerHint(player, Scp914HintData, ElevatorHintData);
+            PlayerManager.AddPlayer(player,data, Scp914HintData, ElevatorHintData);
 
         }
 
         public override void OnPlayerLeft(PlayerLeftEventArgs ev)
         {
             Player player = ev.Player;
-            string nickName = player.Nickname;
-            string userId = player.UserId;
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
 
-            DataExtensions.PlayerList.Remove(player);
+            string nickName = player.Nickname;
+            string userId = player.UserId;
+
             PlayerData data = player.GetData();
             data.LastJoinedTime = DateTime.Now;
             data.UpdateData();
@@ -187,24 +182,16 @@ namespace EasyTools.Events
                 File.AppendAllText(path, playerInfo + Environment.NewLine);
             }
 
-            if (BadgeConfig.Enable)
-            {
-                if (BadgeExtensions.rainbw.Contains(player))
-                {
-                    BadgeExtensions.rainbw.Remove(player);
-                }
-            }
+            var info = PlayerManager.Get(player);
 
-            if (PlayerHuds.ContainsKey(player))
-            {
-                PlayerHuds.Remove(player);
-            }
+            PlayerManager.ClearSwapRequestsTo(player);
+            PlayerManager.RemovePlayer(player);
 
             if (Config.EnableSCPReplace)
             {
                 // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
                 foreach (var entry in Replacements.Values)
-                    entry.Applicants.Remove(player);
+                    entry.Applicants.Remove(info);
 
                 if (player.IsSCP)
                 {
@@ -228,7 +215,9 @@ namespace EasyTools.Events
                 return;
 
             // 从补位名单中筛选仍在线的人类玩家
-            var valid = entry.Applicants.Where(p => p != null && p.IsHuman).ToList();
+            var valid = entry.Applicants
+                .Where(i => i.Player is not null && i.Player.IsHuman)
+                .ToList();
 
             if (valid.Count == 0)
             {
@@ -238,10 +227,12 @@ namespace EasyTools.Events
 
             // 随机选择
             var chosen = valid[UnityEngine.Random.Range(0, valid.Count)];
-            chosen.Role = role;
+            chosen.Player.Role = role;
 
-            Server.SendBroadcast($"<color=green>补位成功！{chosen.Nickname} 成为了 {role}。</color>", 10);
-            Log.Info($"{chosen.Nickname} 补位成为 {role}");
+            Server.SendBroadcast($"<color=green>补位成功！{chosen.NickName} 成为了 {role}。</color>", 10);
+            Log.Info($"{chosen.NickName} 补位成为 {role}");
+
+            Replacements.Remove(role);
         }
 
         private static volatile bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114
@@ -495,9 +486,12 @@ namespace EasyTools.Events
 
             foreach (var p in Player.List)
             {
-                if (p.IsAlive && p != null && p.Room.Name == RoomName.Lcz914)// 检测914附近玩家，然后告诉他们914正在运行
+                if (p is null || !p.IsAlive) continue;
+                if (p.Room.Name != RoomName.Lcz914) continue;  // 检测914附近玩家，然后告诉他们914正在运行
+
+                if (PlayerManager.TryGet(p, out var info))
                 {
-                    PlayerHuds[p].Show914(msg);
+                    info.Hud.Show914(msg);
                 }
             }
         }
@@ -506,14 +500,18 @@ namespace EasyTools.Events
         {
             if (HUDInfoConfig.EnableElevatorInfo == false) return;
 
-            IEnumerable<Player> near = Player.List.Where(p =>
-                Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.ElevatorHintRange);
-
             var p_operator = ev.Player.Nickname ?? "未知";
             string text = TranslateConfig.ElevatorTemplate.Replace("{p_operator}", p_operator);
-            foreach (var p in near)
+
+            foreach (var info in PlayerManager.PlayerList)
             {
-                PlayerHuds[p].ShowElevator(text);
+                var p = info.Player;
+                if (p is null || !p.IsAlive) continue;
+
+                if (Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.ElevatorHintRange)
+                {
+                    info.Hud.ShowElevator(text);
+                }
             }
         }
     }

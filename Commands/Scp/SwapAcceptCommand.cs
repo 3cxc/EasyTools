@@ -37,18 +37,23 @@ namespace EasyTools.Commands.Scp
                 return false;
             }
 
+            var info = CustomEventHandler.PlayerManager.Get(player);
+            if (info is null) { response = "玩家状态异常"; return false; }
+
             // 检查是否有发给自己的请求
-            if (!CustomEventHandler.SwapRequests.TryGetValue(player, out Player requester))
+            Player requester = info.SwapRequestFrom;
+
+            if (requester is null)
             {
                 response = CustomEventHandler.TranslateConfig.SwapCommandNoRequestBroadcastTemplate;
                 return false;
             }
 
-            // 检查发起请求的玩家是否仍然在线且为 SCP
-            if (requester == null || !requester.IsSCP)
+            // 检查发起请求的玩家是否仍然为 SCP
+            if (!requester.IsSCP)
             {
-                CustomEventHandler.SwapRequests.Remove(player);
-                response = "请求已失效，对方已离线或不再是 SCP。";
+                info.SwapRequestFrom = null;
+                response = "请求已失效，对方已不再是 SCP";
                 return false;
             }
 
@@ -57,12 +62,11 @@ namespace EasyTools.Commands.Scp
             requester.Role = player.Role;
             player.Role = tempRole;
 
-            CustomEventHandler.SwapRequests.Remove(player);
+            info.SwapRequestFrom = null;
 
             // 通知玩家
-            string msg = $"<color=green>交换成功！</color> {requester.Nickname} 与 {player.Nickname} 已交换 SCP 身份。";
-            requester.SendBroadcast(msg, 5);
-            player.SendBroadcast(msg, 5);
+            string msg = $"<color=green>{requester.Nickname} 与 {player.Nickname} 已交换 SCP 身份</color>";
+            Server.SendBroadcast(msg, 5);
 
             Log.Info($"{player.Nickname} 与 {requester.Nickname} 交换成功");
 

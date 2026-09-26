@@ -1,6 +1,7 @@
 ﻿using EasyTools.API;
 using EasyTools.DataStructures;
 using EasyTools.Events;
+using GameCore;
 using LabApi.Features.Wrappers;
 using LiteDB;
 using MEC;
@@ -12,13 +13,6 @@ namespace EasyTools.Extensions
 {
     public static class DataExtensions
     {
-
-        /// <summary>
-        /// 玩家列表
-        /// 不用 Player.ReadyList 是因为它包含Dummy
-        /// </summary>
-        public static List<Player> PlayerList = [];
-
         public static PlayerData GetData(this Player ply)
         {
             PlayerData toInsert = null;
@@ -94,14 +88,14 @@ namespace EasyTools.Extensions
             {
                 yield return Timing.WaitForSeconds(60f);
 
-                foreach (Player Player in PlayerList)
+                foreach (PlayerInfo info in CustomEventHandler.PlayerManager.PlayerList)
                 {
-                    if (Player != null && !Player.DoNotTrack)
-                    {
-                        var pLog = Player.GetData();
-                        pLog.PlayedTimes += 60;
-                        pLog.UpdateData();
-                    }
+                    var player = info.Player;
+                    if (player is null || player.DoNotTrack) continue;
+
+                    var data = player.GetData();
+                    data.PlayedTimes += 60;
+                    data.UpdateData();
                 }
                 if (Round.IsRoundEnded)
                 {

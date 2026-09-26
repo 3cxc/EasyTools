@@ -4,6 +4,7 @@ using LabApi.Features.Wrappers;
 using PlayerRoles;
 using System;
 using System.Linq;
+using static UnityEngine.GraphicsBuffer;
 using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.Commands.Scp
@@ -60,25 +61,31 @@ namespace EasyTools.Commands.Scp
             }
 
             // 确保目标SCP存在
-            Player target = Player.List.FirstOrDefault(p => p.IsSCP && p.Role == targetRole);
-            if (target == null)
+            Player target = Player.ReadyList.FirstOrDefault(p => p.IsSCP && p.Role == targetRole);
+            if (target is null)
             {
                 response = $"当前没有 {targetRole} 在线。";
                 return false;
             }
 
+            var targetInfo = CustomEventHandler.PlayerManager.Get(target);
+            if (targetInfo is null) {
+                response = "目标状态异常";
+                return false;
+            }
+
             // 检查是否已存在请求
-            if (CustomEventHandler.SwapRequests.ContainsKey(target))
+            if (targetInfo.SwapRequestFrom is not null)
             {
-                response = $"已有一个交换请求发送给 {target.Nickname}，请等待对方回应。";
+                response = $"已有一个交换请求发送给 {targetInfo.NickName}，请等待对方回应。";
                 return false;
             }
 
             // 保存请求
-            CustomEventHandler.SwapRequests[target] = player;
+            targetInfo.SwapRequestFrom = player;
 
             // 通知目标玩家
-            target.SendBroadcast($"<color=yellow>{player.Nickname}</color> 想与你交换 SCP 身份！输入 <color=green>.swapaccept</color> 接受，或 <color=red>.swapdeny</color> 拒绝。", 10);
+            targetInfo.Player.SendBroadcast($"<color=yellow>{player.Nickname}</color> 想与你交换 SCP 身份！输入 <color=green>.swapaccept</color> 接受，或 <color=red>.swapdeny</color> 拒绝。", 10);
 
             Log.Info($"{player.Nickname} 申请与 {arguments.At(0)} 交换");
 

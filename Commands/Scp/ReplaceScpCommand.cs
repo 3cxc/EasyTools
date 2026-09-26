@@ -51,13 +51,16 @@ namespace EasyTools.Commands.Scp
                 return false;
             }
 
-            if (entry.Applicants.Contains(player))
+            var info = CustomEventHandler.PlayerManager.Get(player);
+            if (info is null) { response = "玩家状态异常"; return false; }
+
+            if (entry.Applicants.Contains(info))
             {
                 response = "你已经申请过该角色了，请等待系统分配。";
                 return false;
             }
 
-            entry.Applicants.Add(player);
+            entry.Applicants.Add(info);
             float remaining = entry.ExpireTime - Time.time;
             response = $"你已申请补位 {targetRole}，等待 {remaining:0.0} 秒后系统随机选择。";
             return true;

@@ -37,15 +37,20 @@ namespace EasyTools.Commands.Scp
                 return false;
             }
 
+            var info = CustomEventHandler.PlayerManager.Get(player);
+            if (info is null) { response = "玩家状态异常"; return false; }
+
             // 检查是否有发给自己的请求
-            if (!CustomEventHandler.SwapRequests.TryGetValue(player, out Player requester))
+            Player requester = info.SwapRequestFrom;
+
+            if (requester is null)
             {
                 response = CustomEventHandler.TranslateConfig.SwapCommandNoRequestBroadcastTemplate;
                 return false;
             }
 
             // 清理请求
-            CustomEventHandler.SwapRequests.Remove(player);
+            info.SwapRequestFrom = null;
 
             // 通知玩家
             player.SendBroadcast($"你拒绝了与 {requester.Nickname} 的交换请求", 5);
