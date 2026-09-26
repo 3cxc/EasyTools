@@ -160,6 +160,7 @@ namespace EasyTools.Events
             PlayerData data = player.GetData();
             data.LastLeftTime = DateTime.Now;
             data.UpdateData();
+            DataExtensions.RemoveFromCache(userId);
 
             if (Config.EnablePlayerLogger)
             {

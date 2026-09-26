@@ -12,66 +12,49 @@ namespace EasyTools.Extensions
 {
     public static class DataExtensions
     {
-        public static PlayerData GetData(this Player ply)
-        {
-            PlayerData toInsert = null;
-            if (!DataAPI.TryGetData(ply.UserId, out PlayerData data))
-            {
-                toInsert = new PlayerData()
-                {
-                    ID = ply.UserId,
-                    NickName = "",
-                    LastJoinedTime = DateTime.Now,
-                    LastLeftTime = DateTime.Now,
-                    PlayedTimes = 0,
-                    PlayerKills = 0,
-                    PlayerDeath = 0,
-                    PlayerSCPKills = 0,
-                    PlayerDamage = 0,
-                    RolePlayed = 0,
-                    PlayerShot = 0,
-                    PlayerXp = 0.0,
-                    PlayerLevel = 0.0
-                };
-                using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
-                database.GetCollection<PlayerData>("Players").Insert(toInsert);
-            }
+        private static readonly Dictionary<string, PlayerData> _cache = new();
 
-            if (data is null)
-                return toInsert;
-            return data;
-        }
+        public static PlayerData GetData(this Player player) => GetOrCreate(player.UserId, player.Nickname);
 
-        public static PlayerData GetData(string userId)
+        public static PlayerData GetData(string userId) => GetOrCreate(userId, null);
+
+        private static PlayerData GetOrCreate(string userId, string nickname)
         {
-            PlayerData toInsert = null;
             if (string.IsNullOrWhiteSpace(userId))
                 throw new ArgumentNullException(nameof(userId));
-            // 验证 Steam ID 格式：纯数字+@steam
+
             if (!Regex.IsMatch(userId, @"^\d+@steam$", RegexOptions.IgnoreCase))
-                throw new FormatException("无效的 Steam ID 格式，应为 数字@steam");
-            if (!DataAPI.TryGetData(userId, out PlayerData data))
+                throw new FormatException($"无效的 Steam ID 格式: {userId}");
+
+            if (_cache.TryGetValue(userId, out var cached))
             {
-                toInsert = new PlayerData()
-                {
-                    ID = userId,
-                    NickName = "",
-                    LastJoinedTime = DateTime.Now,
-                    LastLeftTime = DateTime.Now,
-                    PlayedTimes = 0,
-                    PlayerKills = 0,
-                    PlayerDeath = 0,
-                    PlayerSCPKills = 0,
-                    PlayerDamage = 0,
-                    RolePlayed = 0,
-                    PlayerShot = 0,
-                };
-                using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
-                database.GetCollection<PlayerData>("Players").Insert(toInsert);
+                if (!string.IsNullOrEmpty(nickname))
+                    cached.NickName = nickname;
+                return cached;
             }
 
+            using var db = new LiteDatabase(CustomEventHandler.Config.DataBasePath);
+            var col = db.GetCollection<PlayerData>("Players");
+            var data = col.FindById(userId);
+
             if (data is null)
-                return toInsert;
+            {
+                data = new()
+                {
+                    ID = userId,
+                    NickName = nickname ?? "",
+                    LastJoinedTime = DateTime.Now,
+                    LastLeftTime = DateTime.Now,
+                    PlayerXp = 0.0,
+                    PlayerLevel = 0.0,
+                    PermissionLevel = PermissionLevel.Player,
+                    Badge = "",
+                    BadgeColor = "rainbow"
+                };
+                col.Insert(data);
+            }
+
+            _cache[userId] = data;
             return data;
         }
 
@@ -79,6 +62,12 @@ namespace EasyTools.Extensions
         {
             using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
             database.GetCollection<PlayerData>("Players").Update(data);
+        }
+
+        public static void RemoveFromCache(string userId)
+        {
+            if (!string.IsNullOrEmpty(userId))
+                _cache.Remove(userId);
         }
 
         public static IEnumerator<float> CollectInfo()

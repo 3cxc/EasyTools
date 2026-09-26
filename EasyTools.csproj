@@ -140,7 +140,6 @@
     <Compile Include="Configs\LevelSystemConfig.cs" />
     <Compile Include="Configs\HUDInfoConfig.cs" />
     <Compile Include="Configs\TranslateConfig.cs" />
-    <Compile Include="API\DataAPI.cs" />
     <Compile Include="Extensions\DataExtensions.cs" />
     <Compile Include="DataStructures\HintData.cs" />
     <Compile Include="DataStructures\PlayerData.cs" />
