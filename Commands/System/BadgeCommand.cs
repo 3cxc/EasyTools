@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using EasyTools.API;
 using EasyTools.DataStructures;
 using EasyTools.Events;
 using EasyTools.Extensions;
@@ -41,10 +40,14 @@ namespace EasyTools.Commands.System
                 return false;
             }
 
-            if (!DataAPI.TryGetData(arguments.At(0), out PlayerData targetData))
+            PlayerData targetData;
+            try
             {
-                DataExtensions.GetData(arguments.At(0));
-                response = "无法查找到玩家，已自动创建，请重新执行一次";
+                targetData = DataExtensions.GetData(arguments.At(0));
+            }
+            catch (FormatException)
+            {
+                response = "无效的 Steam ID 格式";
                 return false;
             }
 

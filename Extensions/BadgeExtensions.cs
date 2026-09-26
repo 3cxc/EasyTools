@@ -4,6 +4,7 @@ using LabApi.Features.Wrappers;
 using MEC;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.Extensions
@@ -49,15 +50,13 @@ namespace EasyTools.Extensions
             "pumpkin"
         ];
 
-        public static List<Player> rainbw = new List<Player>();
-
         public static IEnumerator<float> Rainbw()
         {
             while (true)
             {
-                foreach (var item in rainbw)
+                foreach (var item in CustomEventHandler.PlayerManager.PlayerList.Where(info => info.RainbowBadge))
                 {
-                    item.GroupColor = FMoreColo.RandomItem();
+                    item.Player.GroupColor = FMoreColo.RandomItem();
                 }
                 yield return Timing.WaitForSeconds(CustomEventHandler.BadgeConfig.Each);
             }
@@ -66,23 +65,20 @@ namespace EasyTools.Extensions
         public static void ApplyBadge(this Player player)
         {
             PlayerData data = player.GetData();
+            if (data.Badge == "") return;
 
-            if (data.Badge != "")
+            player.GroupName = data.Badge;
+
+            if (string.IsNullOrEmpty(data.BadgeColor)) return;
+
+            if (data.BadgeColor == "rainbow")
             {
-                player.GroupName = data.Badge;
-
-                if (data.BadgeColor != "")
-                {
-                    switch (data.BadgeColor)
-                    {
-                        case "rainbow":
-                            rainbw.Add(player);
-                            break;
-                        default:
-                            player.GroupColor = data.BadgeColor;
-                            break;
-                    }
-                }
+                if (CustomEventHandler.PlayerManager.TryGet(player, out var info))
+                    info.RainbowBadge = true;
+            }
+            else
+            {
+                player.GroupColor = data.BadgeColor;
             }
         }
 
@@ -106,7 +102,8 @@ namespace EasyTools.Extensions
                     default:
                         group = "moderator";
                         break;
-                };
+                }
+                ;
 
                 Server.RunCommand($"/setgroup {player.PlayerId} {group}");
 

@@ -9,65 +9,47 @@ namespace EasyTools.Helper
 {
     public class ScpAutoHealHelper
     {
-
-        private static readonly Dictionary<Player, (Vector3 pos, DateTime time)> _lastMove = [];
-
-        private static readonly Dictionary<Player, float> _lastHealth = [];
-        private static readonly Dictionary<Player, DateTime> _lastDamageTime = [];
-
         public static IEnumerator<float> AutoReal()
         {
-            while (true)
+            while (!Round.IsRoundEnded && Round.IsRoundStarted)
             {
-                if (Round.IsRoundEnded || !Round.IsRoundStarted)
+                foreach (var info in CustomEventHandler.PlayerManager.PlayerList)
                 {
-                    yield break;
-                }
+                    var p = info.Player;
+                    if (p is null || !p.IsSCP) continue;
 
-                foreach (Player p in Player.ReadyList)
-                {
-                    if (p.IsSCP)
+                    // 检测玩家是否受到伤害
+                    float nowHealth = p.Health;
+                    if (nowHealth < info.LastHealth)
                     {
-
-                        // 先检测玩家是否正在受到伤害
-                        if (_lastHealth.TryGetValue(p, out var lastHealth))
-                        {
-                            if (p.Health < lastHealth)
-                            {
-                                _lastDamageTime[p] = DateTime.UtcNow;
-                            }
-                        }
-
-                        _lastHealth[p] = lastHealth;
-
-                        Vector3 pos = p.Position;
-                        if (_lastMove.TryGetValue(p, out var last))
-                        {
-                            if (Vector3.Distance(pos, last.pos) < 0.1f)
-                            {
-
-                                bool canceled = false;
-                                // 检测是否正在受伤
-                                if (_lastDamageTime.TryGetValue(p, out var lastDamageTime))
-                                {
-                                    if (DateTime.UtcNow - lastDamageTime < TimeSpan.FromSeconds(CustomEventHandler.Config.HealATKSecend)) { canceled = true; }
-                                }
-
-                                if (!canceled && DateTime.UtcNow - last.time > TimeSpan.FromSeconds(CustomEventHandler.Config.HealSCPSecend))
-                                {
-                                    float old_health = p.Health;
-                                    float new_health = old_health + CustomEventHandler.Config.HealSCPQuantity;
-                                    if (new_health <= p.MaxHealth)
-                                    {
-                                        p.Health = new_health;
-                                    }
-                                }
-                            }
-                            else { _lastMove[p] = (pos, DateTime.UtcNow); }
-                        }
-                        else { _lastMove[p] = (pos, DateTime.UtcNow); }
+                        info.LastDamageTime = DateTime.UtcNow;
                     }
-                    else if (_lastMove.ContainsKey(p)) { _lastMove.Remove(p); }
+                    info.LastHealth = nowHealth;
+
+                    // 如果玩家正在移动则不回血
+                    Vector3 pos = p.Position;
+                    if (Vector3.Distance(pos, info.LastPosition) >= 0.1f)
+                    {
+                        info.LastPosition = pos;
+                        info.LastMoveTime = DateTime.UtcNow;
+                        continue;
+                    }
+
+                    // 距离上一次受伤时间相隔一定时间后才允许回血
+                    bool recentlyDamaged = (DateTime.UtcNow - info.LastDamageTime).TotalSeconds < CustomEventHandler.Config.HealATKSecend;
+
+                    // 满足上述条件后，还要站立一定时间才可以回血，此期间不能移动
+                    bool stillLongEnough = (DateTime.UtcNow - info.LastMoveTime).TotalSeconds > CustomEventHandler.Config.HealSCPSecend;
+
+                    if (recentlyDamaged || !stillLongEnough) continue;
+
+                    float next = nowHealth + CustomEventHandler.Config.HealSCPQuantity;
+
+                    if (next <= p.MaxHealth)
+                    {
+                        p.Health = next;
+                        info.LastHealth = next;
+                    }
                 }
                 yield return Timing.WaitForSeconds(1f);
             }

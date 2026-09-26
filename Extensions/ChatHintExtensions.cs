@@ -47,6 +47,8 @@ namespace EasyTools.Extensions
 
         private static readonly Dictionary<Player, HintServiceMeow.Core.Models.Hints.Hint> MessageSlot = [];
 
+        private static readonly int MaxMessages = 100;
+
         private static bool HaveAccess(Player player, ChatMessage message)
         {
             if ((DateTime.Now - message.TimeSent).TotalSeconds > CustomEventHandler.Config.MessageTime)
@@ -65,55 +67,69 @@ namespace EasyTools.Extensions
         {
             while (true)
             {
-                var sb = StringBuilderPool.Pool.Get();
-
-                foreach (var messageSlot in MessageSlot)
+                var now = DateTime.Now;
+                while (MessageList.Last is { } lastNode &&
+                       (now - lastNode.Value.TimeSent).TotalSeconds > CustomEventHandler.Config.MessageTime)
                 {
-                    if (!MessageList.Any(x => HaveAccess(messageSlot.Key, x)))
-                    {
-                        messageSlot.Value.Text = string.Empty;
-                        continue;
-                    }
-
-                    sb.AppendLine(CustomEventHandler.TranslateConfig.ChatMessageTitle);
-
-                    foreach (var message in MessageList)
-                    {
-                        if (HaveAccess(messageSlot.Key, message))
-                        {
-                            string messageStr = CustomEventHandler.Config.MessageTemplate
-                                .Replace("{Message}", message.Message)
-                                .Replace("{MessageType}", CustomEventHandler.TranslateConfig.MessageTypeName[message.Type])
-                                .Replace("{MessageTypeColor}", message.Type switch
-                                {
-                                    ChatMessage.MessageType.AdminPrivateChat => "red",
-                                    _ => "{SenderTeamColor}",//Replace by sender's team color later
-                                })
-                                .Replace("{SenderNickname}", message.SenderName)
-                                .Replace("{SenderTeam}", CustomEventHandler.TranslateConfig.ChatSystemTeamTranslation[message.SenderTeam])
-                                .Replace("{SenderRole}", CustomEventHandler.TranslateConfig.ChatSystemRoleTranslation[message.SenderRole])
-                                .Replace("{SenderTeamColor}", message.SenderTeam switch
-                                {
-                                    Team.SCPs => "red",
-                                    Team.ChaosInsurgency => "green",
-                                    Team.Scientists => "yellow",
-                                    Team.ClassD => "orange",
-                                    Team.Dead => "white",
-                                    Team.FoundationForces => "#4EFAFF",
-                                    _ => "white"
-                                })
-                                .Replace("{CountDown}", (CustomEventHandler.Config.MessageTime - (int)(DateTime.Now - message.TimeSent).TotalSeconds).ToString());
-
-
-                            sb.AppendLine(messageStr);
-                        }
-                    }
-
-                    messageSlot.Value.Text = sb.ToString();
-                    sb.Clear();
+                    MessageList.RemoveLast();
                 }
 
-                yield return Timing.WaitForSeconds(0.5f);
+                var sb = StringBuilderPool.Pool.Get();
+
+                try
+                {
+                    foreach (var messageSlot in MessageSlot)
+                    {
+                        if (!MessageList.Any(x => HaveAccess(messageSlot.Key, x)))
+                        {
+                            messageSlot.Value.Text = string.Empty;
+                            continue;
+                        }
+
+                        sb.AppendLine(CustomEventHandler.TranslateConfig.ChatMessageTitle);
+
+                        foreach (var message in MessageList)
+                        {
+                            if (HaveAccess(messageSlot.Key, message))
+                            {
+                                string messageStr = CustomEventHandler.Config.MessageTemplate
+                                    .Replace("{Message}", message.Message)
+                                    .Replace("{MessageType}", CustomEventHandler.TranslateConfig.MessageTypeName[message.Type])
+                                    .Replace("{MessageTypeColor}", message.Type switch
+                                    {
+                                        ChatMessage.MessageType.AdminPrivateChat => "red",
+                                        _ => "{SenderTeamColor}",//Replace by sender's team color later
+                                    })
+                                    .Replace("{SenderNickname}", message.SenderName)
+                                    .Replace("{SenderTeam}", CustomEventHandler.TranslateConfig.ChatSystemTeamTranslation[message.SenderTeam])
+                                    .Replace("{SenderRole}", CustomEventHandler.TranslateConfig.ChatSystemRoleTranslation[message.SenderRole])
+                                    .Replace("{SenderTeamColor}", message.SenderTeam switch
+                                    {
+                                        Team.SCPs => "red",
+                                        Team.ChaosInsurgency => "green",
+                                        Team.Scientists => "yellow",
+                                        Team.ClassD => "orange",
+                                        Team.Dead => "white",
+                                        Team.FoundationForces => "#4EFAFF",
+                                        _ => "white"
+                                    })
+                                    .Replace("{CountDown}", (CustomEventHandler.Config.MessageTime - (int)(DateTime.Now - message.TimeSent).TotalSeconds).ToString());
+
+
+                                sb.AppendLine(messageStr);
+                            }
+                        }
+
+                        messageSlot.Value.Text = sb.ToString();
+                        sb.Clear();
+                    }
+
+                    yield return Timing.WaitForSeconds(0.5f);
+                }
+                finally
+                {
+                    StringBuilderPool.Pool.Return(sb);
+                }
             }
         }
 
@@ -138,11 +154,20 @@ namespace EasyTools.Extensions
             PlayerDisplay.Get(player.ReferenceHub).AddHint(MessageSlot[player]);
         }
 
-        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) => SendMessage(new ChatMessage(sender, type, message));
-
-        public static void SendMessage(ChatMessage message)
+        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) 
         {
-            MessageList.AddFirst(message);
+            MessageList.AddFirst(new ChatMessage(sender, type, message));
+            while (MessageList.Count > MaxMessages)
+                MessageList.RemoveLast();
+        }
+
+        public static void DisposeChatHint(this Player player)
+        {
+            if (player is null) return;
+            if (!MessageSlot.TryGetValue(player, out var hint)) return;
+
+            MessageSlot.Remove(player);
+            PlayerDisplay.Get(player.ReferenceHub)?.RemoveHint(hint);
         }
     }
 }

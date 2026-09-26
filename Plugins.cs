@@ -65,8 +65,7 @@ namespace EasyTools
 
             Instance = null;
 
-            foreach (var hud in CustomEventHandler.PlayerHuds.Values) hud.Dispose();
-            CustomEventHandler.PlayerHuds.Clear();
+            foreach (var info in CustomEventHandler.PlayerManager.PlayerList) info.Hud.Dispose();
         }
 
     }

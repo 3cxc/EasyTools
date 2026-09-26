@@ -1,7 +1,9 @@
 ﻿using EasyTools.Configs;
 using EasyTools.DataStructures;
 using EasyTools.Extensions;
+using EasyTools.GamePlays;
 using EasyTools.Helper;
+using EasyTools.Logger;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp914Events;
@@ -14,7 +16,6 @@ using PlayerRoles;
 using PlayerStatsSystem;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using Log = LabApi.Features.Console.Logger;
@@ -36,24 +37,11 @@ namespace EasyTools.Events
         public static CoinConfig CoinConfig;
 
         public static CoroutineHandle BadgeCoroutine;
-
-        public static readonly Dictionary<Player, PlayerHint> PlayerHuds = new();
+        public static PlayerManager PlayerManager { get; } = new();
 
         public static HintData Scp914HintData, ElevatorHintData;
 
         public static DateTime RoundStartTime { get; private set; }
-
-        // SCP交换列表
-        public static volatile Dictionary<Player, Player> SwapRequests = new Dictionary<Player, Player>();
-
-        // SCP补位列表
-        public static readonly Dictionary<RoleTypeId, ReplacementEntry> Replacements = new();
-
-        public class ReplacementEntry
-        {
-            public List<Player> Applicants = new();
-            public float ExpireTime; // Time.time + 10f
-        }
 
         public override void OnServerWaitingForPlayers()
         {
@@ -61,7 +49,6 @@ namespace EasyTools.Events
 
             if (BadgeConfig.Enable)
             {
-                BadgeExtensions.rainbw.Clear();
                 BadgeCoroutine = Timing.RunCoroutine(BadgeExtensions.Rainbw());
             }
 
@@ -71,6 +58,8 @@ namespace EasyTools.Events
         public override void OnServerRoundStarted()
         {
             RoundStartTime = DateTime.Now;
+            AllowSpawnScp3114 = true;
+            ScpReplaceService.ClearAll();
 
             Timing.CallDelayed(10f, () =>
             {
@@ -83,7 +72,6 @@ namespace EasyTools.Events
                 {
                     Timing.RunCoroutine(ScpAutoHealHelper.AutoReal());
                 }
-                PlayerHuds.Values.ToList().ForEach(h => h.Start());
             });
 
             if (Config.EnablePlayTime)
@@ -118,7 +106,6 @@ namespace EasyTools.Events
 
             player.InitChatHint();
 
-            DataExtensions.PlayerList.Add(player);
             PlayerData data = player.GetData();
             data.NickName = player.Nickname;
             data.LastJoinedTime = DateTime.Now;
@@ -142,110 +129,50 @@ namespace EasyTools.Events
             if (Config.EnablePlayerLogger)
             {
                 string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
-
-                try
-                {
-                    // 递归创建目录
-                    string dir = Path.GetDirectoryName(path);
-                    if (!string.IsNullOrEmpty(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-
-                    File.AppendAllText(path, playerInfo + Environment.NewLine);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e.Message);
-                }
+                FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, playerInfo);
             }
 
-            PlayerHuds[player] = new PlayerHint(player, Scp914HintData, ElevatorHintData);
+            PlayerManager.AddPlayer(player, data, Scp914HintData, ElevatorHintData);
 
         }
 
         public override void OnPlayerLeft(PlayerLeftEventArgs ev)
         {
             Player player = ev.Player;
-            string nickName = player.Nickname;
-            string userId = player.UserId;
 
             if (player == null || string.IsNullOrEmpty(player.UserId)) return;
 
-            DataExtensions.PlayerList.Remove(player);
+            string nickName = player.Nickname;
+            string userId = player.UserId;
+
+            player.DisposeChatHint();
+
             PlayerData data = player.GetData();
-            data.LastJoinedTime = DateTime.Now;
+            data.LastLeftTime = DateTime.Now;
             data.UpdateData();
+            DataExtensions.RemoveFromCache(userId);
 
             if (Config.EnablePlayerLogger)
             {
                 string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {nickName} | Steam64ID: {userId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
-
-                File.AppendAllText(path, playerInfo + Environment.NewLine);
+                FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, playerInfo);
             }
 
-            if (BadgeConfig.Enable)
-            {
-                if (BadgeExtensions.rainbw.Contains(player))
-                {
-                    BadgeExtensions.rainbw.Remove(player);
-                }
-            }
+            // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
+            ScpReplaceService.RemoveApplicant(PlayerManager.Get(player));
 
-            if (PlayerHuds.ContainsKey(player))
-            {
-                PlayerHuds.Remove(player);
-            }
+            PlayerManager.ClearSwapRequestsTo(player);
+            PlayerManager.RemovePlayer(player);
 
             if (Config.EnableSCPReplace)
             {
-                // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
-                foreach (var entry in Replacements.Values)
-                    entry.Applicants.Remove(player);
-
-                if (player.IsSCP)
-                {
-                    var role = player.Role;
-
-                    Replacements[role] = new ReplacementEntry
-                    {
-                        ExpireTime = Time.time + Config.SCPReplaceTime
-                    };
-
-                    Server.SendBroadcast($"\n<b><size=25><color=#00CC00>{player.Role} 掉线，输入 .replace 以补位！</color></size></b>", 3);
-
-                    Timing.CallDelayed(Config.SCPReplaceTime, () => ExecuteReplacement(role));
-                }
+                ScpReplaceService.OpenSlot(player);
             }
         }
 
-        private void ExecuteReplacement(RoleTypeId role)
-        {
-            if (!Replacements.TryGetValue(role, out var entry))
-                return;
-
-            // 从补位名单中筛选仍在线的人类玩家
-            var valid = entry.Applicants.Where(p => p != null && p.IsHuman).ToList();
-
-            if (valid.Count == 0)
-            {
-                Server.SendBroadcast($"<color=orange>{role} 补位无人申请，该角色空缺。</color>", 5);
-                return;
-            }
-
-            // 随机选择
-            var chosen = valid[UnityEngine.Random.Range(0, valid.Count)];
-            chosen.Role = role;
-
-            Server.SendBroadcast($"<color=green>补位成功！{chosen.Nickname} 成为了 {role}。</color>", 10);
-            Log.Info($"{chosen.Nickname} 补位成为 {role}");
-        }
-
-        private static volatile bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114
+        private static bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114
 
         public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
         {
@@ -347,6 +274,8 @@ namespace EasyTools.Events
             }
 
             data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
+            data.UpdateData();
+
             ev.Attacker.UpdatePlayerNameWithLevelPrefix();
         }
 
@@ -404,6 +333,8 @@ namespace EasyTools.Events
                 data.PlayerXp += LevelSystemConfig.HumanEscapeXp;
 
                 data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
+                data.UpdateData();
+
                 ev.Player.UpdatePlayerNameWithLevelPrefix();
 
                 // 通知玩家
@@ -436,23 +367,8 @@ namespace EasyTools.Events
 
 
                 string note = $"[AC] Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.log");
                 Log.Info(note);
-                try
-                {
-                    // 递归创建目录
-                    string dir = Path.GetDirectoryName(path);
-                    if (!string.IsNullOrEmpty(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-
-                    File.AppendAllText(path, note + Environment.NewLine);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e.Message);
-                }
+                FileLogger.AppendForPort(Config.AdminLogPath, Server.Port, note);
             }
         }
 
@@ -496,9 +412,12 @@ namespace EasyTools.Events
 
             foreach (var p in Player.List)
             {
-                if (p.IsAlive && p != null && p.Room.Name == RoomName.Lcz914)// 检测914附近玩家，然后告诉他们914正在运行
+                if (p is null || !p.IsAlive) continue;
+                if (p.Room.Name != RoomName.Lcz914) continue;  // 检测914附近玩家，然后告诉他们914正在运行
+
+                if (PlayerManager.TryGet(p, out var info))
                 {
-                    PlayerHuds[p].Show914(msg);
+                    info.Hud.Show914(msg);
                 }
             }
         }
@@ -507,14 +426,18 @@ namespace EasyTools.Events
         {
             if (HUDInfoConfig.EnableElevatorInfo == false) return;
 
-            IEnumerable<Player> near = Player.List.Where(p =>
-                Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.ElevatorHintRange);
-
             var p_operator = ev.Player.Nickname ?? "未知";
             string text = TranslateConfig.ElevatorTemplate.Replace("{p_operator}", p_operator);
-            foreach (var p in near)
+
+            foreach (var info in PlayerManager.PlayerList)
             {
-                PlayerHuds[p].ShowElevator(text);
+                var p = info.Player;
+                if (p is null || !p.IsAlive) continue;
+
+                if (Vector3.Distance(p.Position, ev.Player.Position) <= HUDInfoConfig.ElevatorHintRange)
+                {
+                    info.Hud.ShowElevator(text);
+                }
             }
         }
     }

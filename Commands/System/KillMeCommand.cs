@@ -2,7 +2,6 @@
 using EasyTools.Configs;
 using EasyTools.Events;
 using LabApi.Features.Wrappers;
-using RelativePositioning;
 using System;
 
 namespace EasyTools.Commands.System
@@ -26,8 +25,6 @@ namespace EasyTools.Commands.System
                 response = TranslateConfig.CommandFailed;
                 return false;
             }
-
-            WaypointBase.GetRelativePosition(player.Position, out byte id, out _);
 
             if (!CustomEventHandler.Config.KillMeCommand)
             {
