@@ -7,7 +7,6 @@ namespace EasyTools.API
 {
     public static class DataAPI
     {
-        public static List<string> TimerHidden { get; } = [];
         public static Dictionary<string, PlayerData> PlayerDataDic = [];
 
         public static bool TryGetData(string id, out PlayerData data)

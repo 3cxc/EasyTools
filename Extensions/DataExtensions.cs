@@ -49,36 +49,6 @@ namespace EasyTools.Extensions
             return data;
         }
 
-        public static PlayerData GetData(this ReferenceHub ply)
-        {
-            PlayerData toInsert = null;
-            if (string.IsNullOrWhiteSpace(ply.authManager.UserId))
-                throw new ArgumentNullException(nameof(ply));
-            if (!DataAPI.TryGetData(ply.authManager.UserId, out PlayerData data))
-            {
-                toInsert = new PlayerData()
-                {
-                    ID = ply.authManager.UserId,
-                    NickName = "",
-                    LastJoinedTime = DateTime.Now,
-                    LastLeftTime = DateTime.Now,
-                    PlayedTimes = 0,
-                    PlayerKills = 0,
-                    PlayerDeath = 0,
-                    PlayerSCPKills = 0,
-                    PlayerDamage = 0,
-                    RolePlayed = 0,
-                    PlayerShot = 0,
-                };
-                using LiteDatabase database = new(CustomEventHandler.Config.DataBasePath);
-                database.GetCollection<PlayerData>("Players").Insert(toInsert);
-            }
-
-            if (data is null)
-                return toInsert;
-            return data;
-        }
-
         public static PlayerData GetData(string userId)
         {
             PlayerData toInsert = null;

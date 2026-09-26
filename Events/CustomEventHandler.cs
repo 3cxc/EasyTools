@@ -83,7 +83,6 @@ namespace EasyTools.Events
                 {
                     Timing.RunCoroutine(ScpAutoHealHelper.AutoReal());
                 }
-                PlayerHuds.Values.ToList().ForEach(h => h.Start());
             });
 
             if (Config.EnablePlayTime)

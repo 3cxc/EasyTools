@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace EasyTools.DataStructures
 {
-    public struct PlayerHint : IDisposable
+    public class PlayerHint : IDisposable
     {
         private readonly List<Hint> _hints = new();
 
@@ -53,8 +53,6 @@ namespace EasyTools.DataStructures
             hint_elevator.Hide = false;
             hint_elevator.HideAfter(7f);
         }
-
-        public void Start() { }
 
         public void Dispose()
         {
