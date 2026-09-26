@@ -67,53 +67,60 @@ namespace EasyTools.Extensions
             {
                 var sb = StringBuilderPool.Pool.Get();
 
-                foreach (var messageSlot in MessageSlot)
+                try
                 {
-                    if (!MessageList.Any(x => HaveAccess(messageSlot.Key, x)))
+                    foreach (var messageSlot in MessageSlot)
                     {
-                        messageSlot.Value.Text = string.Empty;
-                        continue;
-                    }
-
-                    sb.AppendLine(CustomEventHandler.TranslateConfig.ChatMessageTitle);
-
-                    foreach (var message in MessageList)
-                    {
-                        if (HaveAccess(messageSlot.Key, message))
+                        if (!MessageList.Any(x => HaveAccess(messageSlot.Key, x)))
                         {
-                            string messageStr = CustomEventHandler.Config.MessageTemplate
-                                .Replace("{Message}", message.Message)
-                                .Replace("{MessageType}", CustomEventHandler.TranslateConfig.MessageTypeName[message.Type])
-                                .Replace("{MessageTypeColor}", message.Type switch
-                                {
-                                    ChatMessage.MessageType.AdminPrivateChat => "red",
-                                    _ => "{SenderTeamColor}",//Replace by sender's team color later
-                                })
-                                .Replace("{SenderNickname}", message.SenderName)
-                                .Replace("{SenderTeam}", CustomEventHandler.TranslateConfig.ChatSystemTeamTranslation[message.SenderTeam])
-                                .Replace("{SenderRole}", CustomEventHandler.TranslateConfig.ChatSystemRoleTranslation[message.SenderRole])
-                                .Replace("{SenderTeamColor}", message.SenderTeam switch
-                                {
-                                    Team.SCPs => "red",
-                                    Team.ChaosInsurgency => "green",
-                                    Team.Scientists => "yellow",
-                                    Team.ClassD => "orange",
-                                    Team.Dead => "white",
-                                    Team.FoundationForces => "#4EFAFF",
-                                    _ => "white"
-                                })
-                                .Replace("{CountDown}", (CustomEventHandler.Config.MessageTime - (int)(DateTime.Now - message.TimeSent).TotalSeconds).ToString());
-
-
-                            sb.AppendLine(messageStr);
+                            messageSlot.Value.Text = string.Empty;
+                            continue;
                         }
+
+                        sb.AppendLine(CustomEventHandler.TranslateConfig.ChatMessageTitle);
+
+                        foreach (var message in MessageList)
+                        {
+                            if (HaveAccess(messageSlot.Key, message))
+                            {
+                                string messageStr = CustomEventHandler.Config.MessageTemplate
+                                    .Replace("{Message}", message.Message)
+                                    .Replace("{MessageType}", CustomEventHandler.TranslateConfig.MessageTypeName[message.Type])
+                                    .Replace("{MessageTypeColor}", message.Type switch
+                                    {
+                                        ChatMessage.MessageType.AdminPrivateChat => "red",
+                                        _ => "{SenderTeamColor}",//Replace by sender's team color later
+                                    })
+                                    .Replace("{SenderNickname}", message.SenderName)
+                                    .Replace("{SenderTeam}", CustomEventHandler.TranslateConfig.ChatSystemTeamTranslation[message.SenderTeam])
+                                    .Replace("{SenderRole}", CustomEventHandler.TranslateConfig.ChatSystemRoleTranslation[message.SenderRole])
+                                    .Replace("{SenderTeamColor}", message.SenderTeam switch
+                                    {
+                                        Team.SCPs => "red",
+                                        Team.ChaosInsurgency => "green",
+                                        Team.Scientists => "yellow",
+                                        Team.ClassD => "orange",
+                                        Team.Dead => "white",
+                                        Team.FoundationForces => "#4EFAFF",
+                                        _ => "white"
+                                    })
+                                    .Replace("{CountDown}", (CustomEventHandler.Config.MessageTime - (int)(DateTime.Now - message.TimeSent).TotalSeconds).ToString());
+
+
+                                sb.AppendLine(messageStr);
+                            }
+                        }
+
+                        messageSlot.Value.Text = sb.ToString();
+                        sb.Clear();
                     }
 
-                    messageSlot.Value.Text = sb.ToString();
-                    sb.Clear();
+                    yield return Timing.WaitForSeconds(0.5f);
                 }
-
-                yield return Timing.WaitForSeconds(0.5f);
+                finally
+                {
+                    StringBuilderPool.Pool.Return(sb);
+                }
             }
         }
 
