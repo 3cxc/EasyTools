@@ -67,6 +67,7 @@ namespace EasyTools.Events
         public override void OnServerRoundStarted()
         {
             RoundStartTime = DateTime.Now;
+            AllowSpawnScp3114 = true;
 
             Timing.CallDelayed(10f, () =>
             {
