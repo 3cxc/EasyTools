@@ -1,5 +1,4 @@
-﻿using EasyTools.API;
-using EasyTools.DataStructures;
+﻿using EasyTools.DataStructures;
 using EasyTools.Events;
 using LabApi.Features.Wrappers;
 using LiteDB;

@@ -154,7 +154,7 @@ namespace EasyTools.Extensions
             PlayerDisplay.Get(player.ReferenceHub).AddHint(MessageSlot[player]);
         }
 
-        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) 
+        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message)
         {
             MessageList.AddFirst(new ChatMessage(sender, type, message));
             while (MessageList.Count > MaxMessages)

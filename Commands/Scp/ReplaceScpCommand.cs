@@ -4,7 +4,6 @@ using EasyTools.GamePlays;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
 using System;
-using UnityEngine;
 
 namespace EasyTools.Commands.Scp
 {

@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using EasyTools.API;
 using EasyTools.DataStructures;
 using EasyTools.Events;
 using EasyTools.Extensions;

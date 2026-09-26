@@ -147,6 +147,8 @@
     <Compile Include="DataStructures\PlayerHint.cs" />
     <Compile Include="Events\CustomEventHandler.cs" />
     <Compile Include="GamePlays\PlayerManager.cs" />
+    <Compile Include="GamePlays\ScpReplaceService.cs" />
+    <Compile Include="GamePlays\ScpSwapService.cs" />
     <Compile Include="Logger\FileLogger.cs" />
     <Compile Include="Plugins.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
