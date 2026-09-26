@@ -121,6 +121,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Chat\ChatCommandBase.cs" />
     <Compile Include="Commands\System\BadgeCommand.cs" />
     <Compile Include="Commands\System\PermissionCommand.cs" />
     <Compile Include="Extensions\BadgeExtensions.cs" />

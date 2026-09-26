@@ -1,44 +1,19 @@
 ﻿using CommandSystem;
-using EasyTools.Configs;
 using EasyTools.Events;
 using EasyTools.Extensions;
-using LabApi.Features.Wrappers;
-using System;
-using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.Commands.Chat
 {
     [CommandHandler(typeof(ClientCommandHandler))]
-    public class AcCommand : ICommand
+    public class AcCommand : ChatCommandBase
     {
-        public string Command => "ac";
+        protected override ChatMessage.MessageType MessageType => ChatMessage.MessageType.AdminPrivateChat;
+        protected override bool Enabled => CustomEventHandler.Config.EnableAcSystem;
 
-        public string[] Aliases => [];
+        public override string Command => "ac";
 
-        public string Description => "私聊管理-Talk to Admin";
+        public override string[] Aliases => [];
 
-        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
-        {
-            TranslateConfig TranslateConfig = CustomEventHandler.TranslateConfig;
-            Player player;
-
-            if (sender is null || (player = Player.Get(sender)) is null)
-            {
-                response = TranslateConfig.CommandNotAllowed;
-                return false;
-            }
-
-            if (arguments.Count == 0 || player.IsMuted || !CustomEventHandler.Config.EnableAcSystem)
-            {
-                response = TranslateConfig.ChatCommandFailed;
-                return false;
-            }
-
-            player.SendHintMessage(ChatMessage.MessageType.AdminPrivateChat, $"<noparse>{string.Join(" ", arguments)}</noparse>");
-
-            Log.Info(player.Nickname + " 发送了 " + arguments.At(0));
-            response = TranslateConfig.ChatCommandOk;
-            return true;
-        }
+        public override string Description => "私聊管理-Talk to Admin";
     }
 }
