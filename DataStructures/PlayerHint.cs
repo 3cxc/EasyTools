@@ -57,6 +57,7 @@ namespace EasyTools.DataStructures
         public void Dispose()
         {
             foreach (var h in _hints) h.Hide = true;
+            _hints.Clear();
         }
     }
 }

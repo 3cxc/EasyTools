@@ -168,17 +168,19 @@ namespace EasyTools.Events
                 FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, playerInfo);
             }
 
+            // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
             var info = PlayerManager.Get(player);
+            if (info is not null)
+            {
+                foreach (var entry in Replacements.Values)
+                    entry.Applicants.Remove(info);
+            }
 
             PlayerManager.ClearSwapRequestsTo(player);
             PlayerManager.RemovePlayer(player);
 
             if (Config.EnableSCPReplace)
             {
-                // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
-                foreach (var entry in Replacements.Values)
-                    entry.Applicants.Remove(info);
-
                 if (player.IsSCP)
                 {
                     var role = player.Role;
@@ -221,7 +223,7 @@ namespace EasyTools.Events
             Replacements.Remove(role);
         }
 
-        private static volatile bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114
+        private static bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114
 
         public override void OnPlayerSpawning(PlayerSpawningEventArgs ev)
         {
