@@ -322,6 +322,8 @@ namespace EasyTools.Events
             }
 
             data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
+            data.UpdateData();
+
             ev.Attacker.UpdatePlayerNameWithLevelPrefix();
         }
 
@@ -379,6 +381,8 @@ namespace EasyTools.Events
                 data.PlayerXp += LevelSystemConfig.HumanEscapeXp;
 
                 data.PlayerLevel = LevelExtensions.GetLevelFromXp(data.PlayerXp, LevelSystemConfig.XpScaleFactor);
+                data.UpdateData();
+
                 ev.Player.UpdatePlayerNameWithLevelPrefix();
 
                 // 通知玩家
