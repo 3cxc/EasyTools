@@ -47,6 +47,8 @@ namespace EasyTools.Extensions
 
         private static readonly Dictionary<Player, HintServiceMeow.Core.Models.Hints.Hint> MessageSlot = [];
 
+        private static readonly int MaxMessages = 100;
+
         private static bool HaveAccess(Player player, ChatMessage message)
         {
             if ((DateTime.Now - message.TimeSent).TotalSeconds > CustomEventHandler.Config.MessageTime)
@@ -65,6 +67,13 @@ namespace EasyTools.Extensions
         {
             while (true)
             {
+                var now = DateTime.Now;
+                while (MessageList.Last is { } lastNode &&
+                       (now - lastNode.Value.TimeSent).TotalSeconds > CustomEventHandler.Config.MessageTime)
+                {
+                    MessageList.RemoveLast();
+                }
+
                 var sb = StringBuilderPool.Pool.Get();
 
                 try
@@ -145,7 +154,12 @@ namespace EasyTools.Extensions
             PlayerDisplay.Get(player.ReferenceHub).AddHint(MessageSlot[player]);
         }
 
-        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) => MessageList.AddFirst(new ChatMessage(sender, type, message));
+        public static void SendHintMessage(this Player sender, ChatMessage.MessageType type, string message) 
+        {
+            MessageList.AddFirst(new ChatMessage(sender, type, message));
+            while (MessageList.Count > MaxMessages)
+                MessageList.RemoveLast();
+        }
 
         public static void DisposeChatHint(this Player player)
         {
