@@ -170,7 +170,7 @@ namespace EasyTools.Events
             string userId = player.UserId;
 
             PlayerData data = player.GetData();
-            data.LastJoinedTime = DateTime.Now;
+            data.LastLeftTime = DateTime.Now;
             data.UpdateData();
 
             if (Config.EnablePlayerLogger)
