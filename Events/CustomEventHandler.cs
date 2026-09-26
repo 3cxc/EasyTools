@@ -3,6 +3,7 @@ using EasyTools.DataStructures;
 using EasyTools.Extensions;
 using EasyTools.GamePlays;
 using EasyTools.Helper;
+using EasyTools.Logger;
 using InventorySystem.Items;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp914Events;
@@ -15,7 +16,6 @@ using PlayerRoles;
 using PlayerStatsSystem;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using Log = LabApi.Features.Console.Logger;
@@ -137,24 +137,8 @@ namespace EasyTools.Events
             if (Config.EnablePlayerLogger)
             {
                 string playerInfo = $"[JOIN] Date: {DateTime.Now} | Player: {ev.Player.Nickname} | IP: {ev.Player.IpAddress} | Steam64ID: {ev.Player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
-
-                try
-                {
-                    // 递归创建目录
-                    string dir = Path.GetDirectoryName(path);
-                    if (!string.IsNullOrEmpty(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-
-                    File.AppendAllText(path, playerInfo + Environment.NewLine);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e.Message);
-                }
+                FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, playerInfo);
             }
 
             PlayerManager.AddPlayer(player,data, Scp914HintData, ElevatorHintData);
@@ -177,10 +161,8 @@ namespace EasyTools.Events
             if (Config.EnablePlayerLogger)
             {
                 string playerInfo = $"[EXIT] Date: {DateTime.Now} | Player: {nickName} | Steam64ID: {userId}";
-                string path = Path.Combine(CustomEventHandler.Config.PlayerLogPath, $"{Server.Port}.log");
                 Log.Info(playerInfo);
-
-                File.AppendAllText(path, playerInfo + Environment.NewLine);
+                FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, playerInfo);
             }
 
             var info = PlayerManager.Get(player);
@@ -427,23 +409,8 @@ namespace EasyTools.Events
 
 
                 string note = $"[AC] Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
-                string path = Path.Combine(CustomEventHandler.Config.AdminLogPath, $"{Server.Port}.log");
                 Log.Info(note);
-                try
-                {
-                    // 递归创建目录
-                    string dir = Path.GetDirectoryName(path);
-                    if (!string.IsNullOrEmpty(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-
-                    File.AppendAllText(path, note + Environment.NewLine);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e.Message);
-                }
+                FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, note);
             }
         }
 
