@@ -4,7 +4,6 @@ using LabApi.Features.Wrappers;
 using PlayerRoles;
 using System;
 using System.Linq;
-using static UnityEngine.GraphicsBuffer;
 using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.Commands.Scp
@@ -69,7 +68,8 @@ namespace EasyTools.Commands.Scp
             }
 
             var targetInfo = CustomEventHandler.PlayerManager.Get(target);
-            if (targetInfo is null) {
+            if (targetInfo is null)
+            {
                 response = "目标状态异常";
                 return false;
             }

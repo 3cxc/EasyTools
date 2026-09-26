@@ -46,7 +46,7 @@ namespace EasyTools.Configs
 
         [Description("聊天消息的格式，可用的标签为{Message}，{MessageType}, {MessageTypeColor}, {SenderNickname}，{SenderTeam}，{SenderRole} ，{SenderTeamColor}, {CountDown}")]
         public string MessageTemplate { get; set; } = "[{CountDown}]<color={{SenderTeamColor}}>[{SenderTeam}][{SenderRole}]</color><color={MessageTypeColor}>[{MessageType}]</color>{SenderNickname}: {Message}";
-        
+
         /// /////////////////////////////////////////////////
         [Description("是否启用管理权限系统")]
         public bool EnableAdmin { get; set; } = true;

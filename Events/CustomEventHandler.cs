@@ -141,7 +141,7 @@ namespace EasyTools.Events
                 FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, playerInfo);
             }
 
-            PlayerManager.AddPlayer(player,data, Scp914HintData, ElevatorHintData);
+            PlayerManager.AddPlayer(player, data, Scp914HintData, ElevatorHintData);
 
         }
 

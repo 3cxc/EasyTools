@@ -102,7 +102,8 @@ namespace EasyTools.Extensions
                     default:
                         group = "moderator";
                         break;
-                };
+                }
+                ;
 
                 Server.RunCommand($"/setgroup {player.PlayerId} {group}");
 
