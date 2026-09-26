@@ -417,7 +417,7 @@ namespace EasyTools.Events
 
                 string note = $"[AC] Date: {DateTime.Now} | Player: {player.Nickname} | Command: {command} | Steam64ID: {player.UserId}";
                 Log.Info(note);
-                FileLogger.AppendForPort(Config.PlayerLogPath, Server.Port, note);
+                FileLogger.AppendForPort(Config.AdminLogPath, Server.Port, note);
             }
         }
 
