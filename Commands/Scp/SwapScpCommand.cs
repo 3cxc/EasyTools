@@ -1,10 +1,9 @@
 ﻿using CommandSystem;
 using EasyTools.Events;
+using EasyTools.GamePlays;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
 using System;
-using System.Linq;
-using Log = LabApi.Features.Console.Logger;
 
 namespace EasyTools.Commands.Scp
 {
@@ -19,23 +18,9 @@ namespace EasyTools.Commands.Scp
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player;
-
-            if (sender is null || (player = Player.Get(sender)) is null || !(player = Player.Get(sender)).IsSCP)
+            if (sender is null || Player.Get(sender) is not { } player)
             {
                 response = CustomEventHandler.TranslateConfig.CommandNotAllowed;
-                return false;
-            }
-
-            if (!CustomEventHandler.Config.EnableSCPStartExchange)
-            {
-                response = CustomEventHandler.TranslateConfig.CommandNotEnabled;
-                return false;
-            }
-
-            if ((DateTime.Now - CustomEventHandler.RoundStartTime).TotalSeconds > CustomEventHandler.Config.SCPStartExchangeTime)
-            {
-                response = CustomEventHandler.TranslateConfig.SwapCommandTimeLimitBroadcastTemplate;
                 return false;
             }
 
@@ -52,45 +37,7 @@ namespace EasyTools.Commands.Scp
                 return false;
             }
 
-            // 防止与自己交换
-            if (player.Role == targetRole)
-            {
-                response = "你不能与自己交换。";
-                return false;
-            }
-
-            // 确保目标SCP存在
-            Player target = Player.ReadyList.FirstOrDefault(p => p.IsSCP && p.Role == targetRole);
-            if (target is null)
-            {
-                response = $"当前没有 {targetRole} 在线。";
-                return false;
-            }
-
-            var targetInfo = CustomEventHandler.PlayerManager.Get(target);
-            if (targetInfo is null)
-            {
-                response = "目标状态异常";
-                return false;
-            }
-
-            // 检查是否已存在请求
-            if (targetInfo.SwapRequestFrom is not null)
-            {
-                response = $"已有一个交换请求发送给 {targetInfo.NickName}，请等待对方回应。";
-                return false;
-            }
-
-            // 保存请求
-            targetInfo.SwapRequestFrom = player;
-
-            // 通知目标玩家
-            targetInfo.Player.SendBroadcast($"<color=yellow>{player.Nickname}</color> 想与你交换 SCP 身份！输入 <color=green>.swapaccept</color> 接受，或 <color=red>.swapdeny</color> 拒绝。", 10);
-
-            Log.Info($"{player.Nickname} 申请与 {arguments.At(0)} 交换");
-
-            response = "申请成功";
-            return true;
+            return ScpSwapService.TryRequest(player, targetRole, out response);
         }
     }
 }

@@ -43,15 +43,6 @@ namespace EasyTools.Events
 
         public static DateTime RoundStartTime { get; private set; }
 
-        // SCP补位列表
-        public static readonly Dictionary<RoleTypeId, ReplacementEntry> Replacements = new();
-
-        public class ReplacementEntry
-        {
-            public List<PlayerInfo> Applicants = new();
-            public float ExpireTime; // Time.time + 10f
-        }
-
         public override void OnServerWaitingForPlayers()
         {
             base.OnServerWaitingForPlayers();
@@ -68,7 +59,7 @@ namespace EasyTools.Events
         {
             RoundStartTime = DateTime.Now;
             AllowSpawnScp3114 = true;
-            Replacements.Clear();
+            ScpReplaceService.ClearAll();
 
             Timing.CallDelayed(10f, () =>
             {
@@ -170,58 +161,15 @@ namespace EasyTools.Events
             }
 
             // 清理该玩家在所有补位申请中的记录（防止幽灵申请）
-            var info = PlayerManager.Get(player);
-            if (info is not null)
-            {
-                foreach (var entry in Replacements.Values)
-                    entry.Applicants.Remove(info);
-            }
+            ScpReplaceService.RemoveApplicant(PlayerManager.Get(player));
 
             PlayerManager.ClearSwapRequestsTo(player);
             PlayerManager.RemovePlayer(player);
 
             if (Config.EnableSCPReplace)
             {
-                if (player.IsSCP)
-                {
-                    var role = player.Role;
-
-                    Replacements[role] = new ReplacementEntry
-                    {
-                        ExpireTime = Time.time + Config.SCPReplaceTime
-                    };
-
-                    Server.SendBroadcast($"\n<b><size=25><color=#00CC00>{player.Role} 掉线，输入 .replace 以补位！</color></size></b>", 3);
-
-                    Timing.CallDelayed(Config.SCPReplaceTime, () => ExecuteReplacement(role));
-                }
+                ScpReplaceService.OpenSlot(player);
             }
-        }
-
-        private void ExecuteReplacement(RoleTypeId role)
-        {
-            if (!Replacements.TryGetValue(role, out var entry))
-                return;
-
-            // 从补位名单中筛选仍在线的人类玩家
-            var valid = entry.Applicants
-                .Where(i => i.Player is not null && i.Player.IsHuman)
-                .ToList();
-
-            if (valid.Count == 0)
-            {
-                Server.SendBroadcast($"<color=orange>{role} 补位无人申请，该角色空缺。</color>", 5);
-                return;
-            }
-
-            // 随机选择
-            var chosen = valid[UnityEngine.Random.Range(0, valid.Count)];
-            chosen.Player.Role = role;
-
-            Server.SendBroadcast($"<color=green>补位成功！{chosen.NickName} 成为了 {role}。</color>", 10);
-            Log.Info($"{chosen.NickName} 补位成为 {role}");
-
-            Replacements.Remove(role);
         }
 
         private static bool AllowSpawnScp3114 = true; //用以确保不会重复生成 SCP-3114

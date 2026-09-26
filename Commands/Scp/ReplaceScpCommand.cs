@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using EasyTools.Events;
+using EasyTools.GamePlays;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
 using System;
@@ -18,9 +19,7 @@ namespace EasyTools.Commands.Scp
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player;
-
-            if (sender is null || (player = Player.Get(sender)) is null || (player = Player.Get(sender)).IsSCP)
+            if (sender is null || Player.Get(sender) is not { } player || player.IsSCP)
             {
                 response = CustomEventHandler.TranslateConfig.CommandNotAllowed;
                 return false;
@@ -45,25 +44,7 @@ namespace EasyTools.Commands.Scp
                 return false;
             }
 
-            if (!CustomEventHandler.Replacements.TryGetValue(targetRole, out var entry) || Time.time > entry.ExpireTime)
-            {
-                response = $"当前没有 {targetRole} 的补位名额或已过期。";
-                return false;
-            }
-
-            var info = CustomEventHandler.PlayerManager.Get(player);
-            if (info is null) { response = "玩家状态异常"; return false; }
-
-            if (entry.Applicants.Contains(info))
-            {
-                response = "你已经申请过该角色了，请等待系统分配。";
-                return false;
-            }
-
-            entry.Applicants.Add(info);
-            float remaining = entry.ExpireTime - Time.time;
-            response = $"你已申请补位 {targetRole}，等待 {remaining:0.0} 秒后系统随机选择。";
-            return true;
+            return ScpReplaceService.TryApply(player, targetRole, out response);
         }
     }
 }
